@@ -1,10 +1,10 @@
--- Grow A Garden | Egg-Only Pet ESP (Cartoon Theme)
--- by ChatGPT
+-- Grow A Garden | Egg-Only Pet ESP (Enhanced UI)
+-- Pet Predictor by Kuni
 
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- 🥚 Wiki Egg-to-Pet Table
+-- 🥚 Egg to Pet Table
 local eggToPets = {
     ["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
     ["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
@@ -18,7 +18,6 @@ local eggToPets = {
 }
 
 local espList = {}
-local espEnabled = false
 
 local function clearESP()
     for _, gui in pairs(espList) do
@@ -33,21 +32,20 @@ local function createESP(part, petName)
     if part and not part:FindFirstChild("EggESP") then
         local gui = Instance.new("BillboardGui", part)
         gui.Name = "EggESP"
-        gui.Size = UDim2.new(0, 120, 0, 50)
+        gui.Size = UDim2.new(0, 100, 0, 40)
         gui.StudsOffset = Vector3.new(0, 2.5, 0)
         gui.AlwaysOnTop = true
-        gui.Parent = part
 
         local label = Instance.new("TextLabel", gui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = petName
-        label.TextColor3 = Color3.fromRGB(255, 215, 85)  -- Yellowish color to give it a friendly look
-        label.TextStrokeTransparency = 0.3
-        label.Font = Enum.Font.Cartoon
-        label.TextScaled = true
+        label.TextColor3 = Color3.new(1, 1, 1)
         label.TextStrokeTransparency = 0.5
+        label.Font = Enum.Font.SourceSans
+        label.TextScaled = true
 
+        gui.Parent = part
         table.insert(espList, gui)
     end
 end
@@ -60,21 +58,6 @@ local function getRandomPet(eggName)
     return "Unknown"
 end
 
--- 🔍 ESP on hatchable eggs only
-local function scanHatchableEggs()
-    clearESP()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj:GetAttribute("READY") == true then
-            local eggName = obj:GetAttribute("EggName")
-            local part = obj:FindFirstChildWhichIsA("BasePart")
-            if eggName and eggToPets[eggName] and part then
-                createESP(part, getRandomPet(eggName))
-            end
-        end
-    end
-end
-
--- 🔀 Random ESP on all known eggs
 local function randomizeEggs()
     clearESP()
     for _, obj in ipairs(workspace:GetDescendants()) do
@@ -87,74 +70,97 @@ local function randomizeEggs()
     end
 end
 
--- 🧭 GUI Setup
+-- GUI Setup
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "EggESP_UI"
+gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Size = UDim2.new(0, 200, 0, 120)
 frame.Position = UDim2.new(0.01, 0, 0.35, 0)
-frame.BackgroundColor3 = Color3.fromRGB(255, 180, 50)  -- Bright yellow-orange background
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
-local frameCorner = Instance.new("UICorner", frame)  -- Rounded corners for frame
-frameCorner.CornerRadius = UDim.new(0, 16)
 
+-- Title
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0.25, 0)
+title.Size = UDim2.new(1, -40, 0.25, 0)
+title.Position = UDim2.new(0, 5, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Egg Predictor by Kuni"
-title.TextColor3 = Color3.fromRGB(255, 85, 85)  -- Friendly, red color for the title
-title.Font = Enum.Font.Cartoon
-title.TextSize = 22
-title.TextStrokeTransparency = 0.4
+title.Text = "Pet Predictor By Kuni"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.SourceSans
+title.TextSize = 18
+title.TextXAlignment = Enum.TextXAlignment.Left
 
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
-toggleBtn.Position = UDim2.new(0.05, 0, 0.3, 0)
-toggleBtn.Text = "Toggle Pet Predictor"
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)  -- Bright green for a friendly button
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.Cartoon
-toggleBtn.TextSize = 16
-local toggleBtnCorner = Instance.new("UICorner", toggleBtn)  -- Rounded corners for button
-toggleBtnCorner.CornerRadius = UDim.new(0, 8)
+-- Exit Button (X)
+local exitBtn = Instance.new("TextButton", frame)
+exitBtn.Size = UDim2.new(0, 20, 0, 20)
+exitBtn.Position = UDim2.new(1, -22, 0, 2)
+exitBtn.Text = "❌"
+exitBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+exitBtn.TextColor3 = Color3.new(1, 1, 1)
+exitBtn.Font = Enum.Font.SourceSans
+exitBtn.TextSize = 14
 
+-- Minimize Button (_)
+local minBtn = Instance.new("TextButton", frame)
+minBtn.Size = UDim2.new(0, 20, 0, 20)
+minBtn.Position = UDim2.new(1, -44, 0, 2)
+minBtn.Text = "–"
+minBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+minBtn.TextColor3 = Color3.new(1, 1, 1)
+minBtn.Font = Enum.Font.SourceSans
+minBtn.TextSize = 18
+
+-- Minimized icon
+local minimizedIcon = Instance.new("TextButton", gui)
+minimizedIcon.Size = UDim2.new(0, 120, 0, 30)
+minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
+minimizedIcon.Text = "📦 Open Pet Predictor"
+minimizedIcon.Visible = false
+minimizedIcon.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
+minimizedIcon.Font = Enum.Font.SourceSans
+minimizedIcon.TextSize = 14
+
+-- Randomize Button
 local randomBtn = Instance.new("TextButton", frame)
-randomBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
-randomBtn.Position = UDim2.new(0.05, 0, 0.65, 0)
-randomBtn.Text = "Randomize Pet Accurate"
-randomBtn.BackgroundColor3 = Color3.fromRGB(80, 180, 255)  -- Light blue for the randomize button
-randomBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-randomBtn.Font = Enum.Font.Cartoon
-randomBtn.TextSize = 16
-local randomBtnCorner = Instance.new("UICorner", randomBtn)  -- Rounded corners for random button
-randomBtnCorner.CornerRadius = UDim.new(0, 8)
+randomBtn.Size = UDim2.new(0.9, 0, 0.5, 0)
+randomBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+randomBtn.Text = "Randomize Pets"
+randomBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
+randomBtn.TextColor3 = Color3.new(1, 1, 1)
+randomBtn.Font = Enum.Font.SourceSans
+randomBtn.TextSize = 14
 
--- 🔘 Buttons
-local running = false
-toggleBtn.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    toggleBtn.Text = espEnabled and "ESP: ON" or "ESP: OFF"
-
-    if espEnabled then
-        running = true
-        task.spawn(function()
-            while running and espEnabled do
-                scanHatchableEggs()
-                task.wait(5)
-            end
-        end)
-    else
-        running = false
-        clearESP()
-    end
+-- Anti-Spam Debounce
+local debounce = false
+randomBtn.MouseButton1Click:Connect(function()
+    if debounce then return end
+    debounce = true
+    randomBtn.Text = "Please wait..."
+    randomizeEggs()
+    task.wait(2)
+    randomBtn.Text = "Randomize Pets"
+    debounce = false
 end)
 
-randomBtn.MouseButton1Click:Connect(function()
-    espEnabled = false
-    running = false
-    toggleBtn.Text = "ESP: OFF"
-    randomizeEggs()
+-- Minimize Button Logic
+minBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    minimizedIcon.Visible = true
+end)
+
+-- Restore from Minimized
+minimizedIcon.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    minimizedIcon.Visible = false
+end)
+
+-- Exit Button Logic
+exitBtn.MouseButton1Click:Connect(function()
+    clearESP()
+    gui:Destroy()
 end)
