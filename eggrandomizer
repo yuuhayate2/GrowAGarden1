@@ -1,6 +1,10 @@
+-- Grow A Garden | Egg-Only Pet ESP (Cartoon Theme)
+-- by ChatGPT
+
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- 🥚 Wiki Egg-to-Pet Table
 local eggToPets = {
     ["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
     ["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
@@ -29,7 +33,7 @@ local function createESP(part, petName)
     if part and not part:FindFirstChild("EggESP") then
         local gui = Instance.new("BillboardGui", part)
         gui.Name = "EggESP"
-        gui.Size = UDim2.new(0, 100, 0, 40)
+        gui.Size = UDim2.new(0, 120, 0, 50)
         gui.StudsOffset = Vector3.new(0, 2.5, 0)
         gui.AlwaysOnTop = true
         gui.Parent = part
@@ -38,10 +42,11 @@ local function createESP(part, petName)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = petName
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextStrokeTransparency = 0.5
-        label.Font = Enum.Font.GothamBold
+        label.TextColor3 = Color3.fromRGB(255, 215, 85)  -- Yellowish color to give it a friendly look
+        label.TextStrokeTransparency = 0.3
+        label.Font = Enum.Font.Cartoon
         label.TextScaled = true
+        label.TextStrokeTransparency = 0.5
 
         table.insert(espList, gui)
     end
@@ -55,20 +60,21 @@ local function getRandomPet(eggName)
     return "Unknown"
 end
 
+-- 🔍 ESP on hatchable eggs only
 local function scanHatchableEggs()
     clearESP()
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj:IsA("Model") and obj:GetAttribute("READY") == true then
             local eggName = obj:GetAttribute("EggName")
             local part = obj:FindFirstChildWhichIsA("BasePart")
-            if eggToPets[eggName] and part then
+            if eggName and eggToPets[eggName] and part then
                 createESP(part, getRandomPet(eggName))
             end
         end
     end
 end
 
-
+-- 🔀 Random ESP on all known eggs
 local function randomizeEggs()
     clearESP()
     for _, obj in ipairs(workspace:GetDescendants()) do
@@ -81,69 +87,56 @@ local function randomizeEggs()
     end
 end
 
-
+-- 🧭 GUI Setup
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "EggESP_UI"
 
--- Frame design with rounded corners, background color, and shadow effect
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 180, 0, 120)
+frame.Size = UDim2.new(0, 200, 0, 150)
 frame.Position = UDim2.new(0.01, 0, 0.35, 0)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BackgroundColor3 = Color3.fromRGB(255, 180, 50)  -- Bright yellow-orange background
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
-frame.BackgroundTransparency = 0.2
-frame.BorderRadius = UDim.new(0, 12)  -- Rounded corners
+local frameCorner = Instance.new("UICorner", frame)  -- Rounded corners for frame
+frameCorner.CornerRadius = UDim.new(0, 16)
 
--- Shadow effect
-local shadow = Instance.new("Frame", frame)
-shadow.Size = UDim2.new(1, 4, 1, 4)
-shadow.Position = UDim2.new(0, -2, 0, -2)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.5
-shadow.ZIndex = frame.ZIndex - 1
-
--- Title label with bold, white text
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0.25, 0)
 title.BackgroundTransparency = 1
-title.Text = "Pet Predictor by Kuni"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.TextStrokeTransparency = 0.5
-title.TextXAlignment = Enum.TextXAlignment.Center
-title.TextYAlignment = Enum.TextYAlignment.Center
+title.Text = "Egg Predictor by Kuni"
+title.TextColor3 = Color3.fromRGB(255, 85, 85)  -- Friendly, red color for the title
+title.Font = Enum.Font.Cartoon
+title.TextSize = 22
+title.TextStrokeTransparency = 0.4
 
--- Toggle Button design
 local toggleBtn = Instance.new("TextButton", frame)
 toggleBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
 toggleBtn.Position = UDim2.new(0.05, 0, 0.3, 0)
-toggleBtn.Text = "Toggle Hatchable ESP"
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
-toggleBtn.TextColor3 = Color3.new(1, 1, 1)
-toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextSize = 14
-toggleBtn.BorderRadius = UDim.new(0, 10)
-toggleBtn.TextStrokeTransparency = 0.5
+toggleBtn.Text = "Toggle Pet Predictor"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 150)  -- Bright green for a friendly button
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.Cartoon
+toggleBtn.TextSize = 16
+local toggleBtnCorner = Instance.new("UICorner", toggleBtn)  -- Rounded corners for button
+toggleBtnCorner.CornerRadius = UDim.new(0, 8)
 
--- Random Button design
 local randomBtn = Instance.new("TextButton", frame)
 randomBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
 randomBtn.Position = UDim2.new(0.05, 0, 0.65, 0)
 randomBtn.Text = "Randomize Pet Accurate"
-randomBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
-randomBtn.TextColor3 = Color3.new(1, 1, 1)
-randomBtn.Font = Enum.Font.GothamBold
-randomBtn.TextSize = 14
-randomBtn.BorderRadius = UDim.new(0, 10)
-randomBtn.TextStrokeTransparency = 0.5
+randomBtn.BackgroundColor3 = Color3.fromRGB(80, 180, 255)  -- Light blue for the randomize button
+randomBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+randomBtn.Font = Enum.Font.Cartoon
+randomBtn.TextSize = 16
+local randomBtnCorner = Instance.new("UICorner", randomBtn)  -- Rounded corners for random button
+randomBtnCorner.CornerRadius = UDim.new(0, 8)
 
+-- 🔘 Buttons
 local running = false
 toggleBtn.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
-    toggleBtn.Text = espEnabled and "EGG PREDICTOR: ON" or "EGG PREDICTOR: OFF"
+    toggleBtn.Text = espEnabled and "ESP: ON" or "ESP: OFF"
 
     if espEnabled then
         running = true
@@ -162,6 +155,6 @@ end)
 randomBtn.MouseButton1Click:Connect(function()
     espEnabled = false
     running = false
-    toggleBtn.Text = "EGG PREDICTOR: OFF"
+    toggleBtn.Text = "ESP: OFF"
     randomizeEggs()
 end)
