@@ -24,6 +24,20 @@ logoLabel.Font = Enum.Font.GothamBlack
 logoLabel.TextScaled = true
 logoLabel.Parent = loadingFrame
 
+-- Animate Logo Pulse
+task.spawn(function()
+	while true do
+		for scale = 1, 10 do
+			logoLabel.Size = UDim2.new(0, 120 + scale, 0, 120 + scale)
+			task.wait(0.03)
+		end
+		for scale = 10, 1, -1 do
+			logoLabel.Size = UDim2.new(0, 120 + scale, 0, 120 + scale)
+			task.wait(0.03)
+		end
+	end
+end)
+
 -- Loading Text with Dots
 local loadingText = Instance.new("TextLabel")
 loadingText.Size = UDim2.new(0, 350, 0, 50)
@@ -46,8 +60,8 @@ task.spawn(function()
 	end
 end)
 
--- Fade Out After Delay
-task.wait(2)
+-- Wait 10 seconds
+task.wait(10)
 running = false
 for i = 0, 1, 0.05 do
 	loadingFrame.BackgroundTransparency = i
@@ -59,15 +73,15 @@ loadingGui:Destroy()
 
 -- 🥚 Egg to Pet Table
 local eggToPets = {
-    ["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
-    ["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
-    ["Rare Egg"]       = {"Monkey", "Orange Tabby", "Pig", "Rooster", "Spotted Deer"},
-    ["Legendary Egg"]  = {"Cow", "Silver Monkey", "Sea Otter", "Turtle", "Polar Bear"},
-    ["Mythical Egg"]   = {"Grey Mouse", "Brown Mouse", "Squirrel", "Red Giant Ant", "Red Fox"},
-    ["Bug Egg"]        = {"Snail", "Giant Ant", "Caterpillar", "Praying Mantis", "Dragonfly"},
-    ["Bee Egg"]        = {"Bee", "Honey Bee", "Bear Bee", "Petal Bee", "Queen Bee"},
-    ["Paradise Egg"]   = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
-    ["Oasis Egg"]      = {"Meerkat", "Sand Snake", "Axolotl", "Hyacinth Macaw"},
+	["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
+	["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
+	["Rare Egg"]       = {"Monkey", "Orange Tabby", "Pig", "Rooster", "Spotted Deer"},
+	["Legendary Egg"]  = {"Cow", "Silver Monkey", "Sea Otter", "Turtle", "Polar Bear"},
+	["Mythical Egg"]   = {"Grey Mouse", "Brown Mouse", "Squirrel", "Red Giant Ant", "Red Fox"},
+	["Bug Egg"]        = {"Snail", "Giant Ant", "Caterpillar", "Praying Mantis", "Dragonfly"},
+	["Bee Egg"]        = {"Bee", "Honey Bee", "Bear Bee", "Petal Bee", "Queen Bee"},
+	["Paradise Egg"]   = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
+	["Oasis Egg"]      = {"Meerkat", "Sand Snake", "Axolotl", "Hyacinth Macaw"},
 }
 
 local espList = {}
@@ -81,7 +95,7 @@ local function clearESP()
 	espList = {}
 end
 
-local function createESP(part, petName)
+local function createESP(part, petName, isHatchable)
 	if part and not part:FindFirstChild("EggESP") then
 		local gui = Instance.new("BillboardGui", part)
 		gui.Name = "EggESP"
@@ -90,15 +104,24 @@ local function createESP(part, petName)
 		gui.AlwaysOnTop = true
 
 		local label = Instance.new("TextLabel", gui)
-		label.Size = UDim2.new(1, 0, 1, 0)
+		label.Size = UDim2.new(1, 0, 0.6, 0)
+		label.Position = UDim2.new(0, 0, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Text = petName
 		label.TextColor3 = Color3.new(1, 1, 1)
 		label.TextStrokeTransparency = 0.5
-		label.Font = Enum.Font.SourceSans
+		label.Font = Enum.Font.SourceSansBold
 		label.TextScaled = true
 
-		gui.Parent = part
+		local status = Instance.new("TextLabel", gui)
+		status.Size = UDim2.new(1, 0, 0.4, 0)
+		status.Position = UDim2.new(0, 0, 0.6, 0)
+		status.BackgroundTransparency = 1
+		status.Text = isHatchable and "✅ Hatchable" or "❌ Not Hatchable"
+		status.TextColor3 = isHatchable and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+		status.Font = Enum.Font.SourceSans
+		status.TextScaled = true
+
 		table.insert(espList, gui)
 	end
 end
@@ -117,7 +140,9 @@ local function randomizeEggs()
 		if obj:IsA("Model") and eggToPets[obj.Name] then
 			local part = obj:FindFirstChildWhichIsA("BasePart")
 			if part then
-				createESP(part, getRandomPet(obj.Name))
+				local petName = getRandomPet(obj.Name)
+				local hatchable = math.random(1, 2) == 1
+				createESP(part, petName, hatchable)
 			end
 		end
 	end
@@ -188,12 +213,25 @@ randomBtn.TextColor3 = Color3.new(1, 1, 1)
 randomBtn.Font = Enum.Font.SourceSans
 randomBtn.TextSize = 14
 
+-- 🌈 RGB Animation
+local function RGBEffect()
+	local hue = 0
+	while randomBtn.Text == "Please wait..." do
+		hue = (hue + 0.02) % 1
+		local color = Color3.fromHSV(hue, 1, 1)
+		randomBtn.BackgroundColor3 = color
+		task.wait(0.05)
+	end
+	randomBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
+end
+
 -- 🧊 Debounce Protection
 local debounce = false
 randomBtn.MouseButton1Click:Connect(function()
 	if debounce then return end
 	debounce = true
 	randomBtn.Text = "Please wait..."
+	task.spawn(RGBEffect)
 	randomizeEggs()
 	task.wait(2)
 	randomBtn.Text = "Randomize Pets"
