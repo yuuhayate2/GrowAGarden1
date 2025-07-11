@@ -2,22 +2,24 @@ local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local SoundService = game:GetService("SoundService")
 
--- === Loading Screen
+-- === Loading Screen (Smaller + Transformer Style)
 local loadingGui = Instance.new("ScreenGui", PlayerGui)
 loadingGui.Name = "LoadingScreen"
 loadingGui.ResetOnSpawn = false
 
 local loadingFrame = Instance.new("Frame", loadingGui)
-loadingFrame.Size = UDim2.new(1,0,1,0)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+loadingFrame.Size = UDim2.new(0, 300, 0, 200)
+loadingFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+loadingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 loadingFrame.BorderSizePixel = 0
 
 local logo = Instance.new("TextLabel", loadingFrame)
-logo.Size = UDim2.new(0,120,0,120)
-logo.Position = UDim2.new(0.5,-60,0.4,-60)
+logo.Size = UDim2.new(0, 100, 0, 100)
+logo.Position = UDim2.new(0.5, -50, 0.3, -50)
 logo.BackgroundTransparency = 1
 logo.Text = "K"
-logo.TextColor3 = Color3.fromRGB(255,50,50)
+logo.TextColor3 = Color3.fromRGB(0, 170, 255)
 logo.Font = Enum.Font.GothamBlack
 logo.TextScaled = true
 
@@ -25,7 +27,7 @@ task.spawn(function()
 	local angle = 0
 	while loadingFrame.Parent do
 		local offset = 5 * math.sin(tick()*2)
-		logo.Size = UDim2.new(0, 120+offset, 0, 120+offset)
+		logo.Size = UDim2.new(0, 100+offset, 0, 100+offset)
 		logo.Rotation = angle
 		angle = (angle + 1) % 360
 		task.wait(0.03)
@@ -33,8 +35,8 @@ task.spawn(function()
 end)
 
 local loadingText = Instance.new("TextLabel", loadingFrame)
-loadingText.Size = UDim2.new(0,350,0,50)
-loadingText.Position = UDim2.new(0.5,-175,0.6,0)
+loadingText.Size = UDim2.new(0,280,0,40)
+loadingText.Position = UDim2.new(0.5,-140,0.65,0)
 loadingText.BackgroundTransparency = 1
 loadingText.TextColor3 = Color3.new(1,1,1)
 loadingText.Font = Enum.Font.SourceSansBold
@@ -64,15 +66,18 @@ for i=0,1,0.05 do
 	loadingText.TextTransparency = i
 	task.wait(0.03)
 end
-
 loadingGui:Destroy()
 
--- === Data Tables
-local eggToPets = { ... } -- (copied unchanged from previous)
+-- === Pet Tables
+local eggToPets = {
+	["Egg1"] = {"Dog", "Bunny"},
+	["Egg2"] = {"Dragon", "Unicorn"},
+}
 local petIcons = {
-	Dog = "rbxassetid://12345", -- replace with actual icon IDs
+	Dog = "rbxassetid://12345",
 	Bunny = "rbxassetid://12346",
-	-- etc.
+	Dragon = "rbxassetid://12347",
+	Unicorn = "rbxassetid://12348",
 }
 
 -- === GUI Setup
@@ -83,16 +88,29 @@ gui.ResetOnSpawn = false
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0,240,0,160)
 frame.Position = UDim2.new(0.01,0,0.35,0)
-frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
-frame.BorderSizePixel = 0
+frame.BackgroundColor3 = Color3.fromRGB(30,30,35)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(60, 60, 70)
 frame.Active = true
 frame.Draggable = true
 
--- Dark Mode toggle
+-- 🌟 Glowing Outline for Frame
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 2
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Color = Color3.fromRGB(0, 170, 255)
+local gradient = Instance.new("UIGradient", stroke)
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 50))
+}
+gradient.Rotation = 45
+
+-- === Theme Toggle
 local darkMode = true
 local function updateTheme()
 	if darkMode then
-		frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+		frame.BackgroundColor3 = Color3.fromRGB(30,30,35)
 	else
 		frame.BackgroundColor3 = Color3.fromRGB(220,220,220)
 	end
@@ -102,64 +120,87 @@ updateTheme()
 local darkToggle = Instance.new("TextButton", frame)
 darkToggle.Size = UDim2.new(0,80,0,20)
 darkToggle.Position = UDim2.new(0,5,1,-25)
-darkToggle.Text = "Toggle Dark"
-darkToggle.Font = Enum.Font.SourceSans
+darkToggle.Text = "⚙️ Theme"
+darkToggle.Font = Enum.Font.Gotham
 darkToggle.TextSize = 14
-darkToggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
+darkToggle.BackgroundColor3 = Color3.fromRGB(70,70,90)
 darkToggle.TextColor3 = Color3.new(1,1,1)
 darkToggle.MouseButton1Click:Connect(function()
 	darkMode = not darkMode
 	updateTheme()
 end)
 
--- Title
+-- === Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,-40,0,25)
 title.Position = UDim2.new(0,5,0,0)
 title.BackgroundTransparency = 1
-title.Text = "Pet Predictor By Kuni"
-title.Font = Enum.Font.SourceSansBold
+title.Text = "🤖 Pet Predictor By Kuni"
+title.Font = Enum.Font.GothamBlack
 title.TextSize = 18
-title.TextColor3 = Color3.new(1,1,1)
+title.TextColor3 = Color3.fromRGB(0,170,255)
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Buttons
+-- === Predict Button (with Glow)
+local randomBtn = Instance.new("TextButton", frame)
+randomBtn.Size = UDim2.new(0.9,0,0.55,0)
+randomBtn.Position = UDim2.new(0.05,0,0.25,0)
+randomBtn.Text = "🔮 Predict Pets"
+randomBtn.Font = Enum.Font.GothamBold
+randomBtn.TextScaled = true
+randomBtn.TextWrapped = true
+randomBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+randomBtn.TextColor3 = Color3.new(1,1,1)
+randomBtn.BorderSizePixel = 2
+randomBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+
+-- 🌟 Glowing Outline for Predict Button
+local glow = Instance.new("UIStroke", randomBtn)
+glow.Thickness = 2
+glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow.Color = Color3.fromRGB(0, 255, 255)
+local glowGrad = Instance.new("UIGradient", glow)
+glowGrad.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255))
+}
+glowGrad.Rotation = 90
+
+-- === Min/Exit Buttons
 local exitBtn = Instance.new("TextButton", frame)
-exitBtn.Size, exitBtn.Position = UDim2.new(0,20,0,20), UDim2.new(1,-22,0,2)
-exitBtn.Text, exitBtn.Font = "❌", Enum.Font.SourceSans
+exitBtn.Size = UDim2.new(0,20,0,20)
+exitBtn.Position = UDim2.new(1,-22,0,2)
+exitBtn.Text = "❌"
+exitBtn.Font = Enum.Font.Gotham
 exitBtn.TextSize = 14
-exitBtn.BackgroundColor3 = Color3.fromRGB(180,50,50)
+exitBtn.BackgroundColor3 = Color3.fromRGB(200,40,40)
 exitBtn.TextColor3 = Color3.new(1,1,1)
 
 local minBtn = Instance.new("TextButton", frame)
-minBtn.Size, minBtn.Position = UDim2.new(0,20,0,20), UDim2.new(1,-44,0,2)
-minBtn.Text, minBtn.Font = "–", Enum.Font.SourceSans
+minBtn.Size = UDim2.new(0,20,0,20)
+minBtn.Position = UDim2.new(1,-44,0,2)
+minBtn.Text = "–"
+minBtn.Font = Enum.Font.Gotham
 minBtn.TextSize = 18
-minBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+minBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
 minBtn.TextColor3 = Color3.new(1,1,1)
 
 local minimizedIcon = Instance.new("TextButton", gui)
-minimizedIcon.Size, minimizedIcon.Position = UDim2.new(0,120,0,30), UDim2.new(0,10,1,-40)
-minimizedIcon.Text = "📦 Open Pet Predictor"
+minimizedIcon.Size = UDim2.new(0,120,0,30)
+minimizedIcon.Position = UDim2.new(0,10,1,-40)
+minimizedIcon.Text = "📦 Open Transformer HUD"
 minimizedIcon.Visible = false
-minimizedIcon.BackgroundColor3 = Color3.fromRGB(50,50,50)
+minimizedIcon.BackgroundColor3 = Color3.fromRGB(40,40,50)
 minimizedIcon.TextColor3 = Color3.new(1,1,1)
-minimizedIcon.Font = Enum.Font.SourceSans
+minimizedIcon.Font = Enum.Font.Gotham
 minimizedIcon.TextSize = 14
 
--- Predict Button + Sound + RGB
-local randomBtn = Instance.new("TextButton", frame)
-randomBtn.Size = UDim2.new(0.9,0,0.5,0)
-randomBtn.Position = UDim2.new(0.05,0,0.25,0)
-randomBtn.Text = "Predict Pets"
-randomBtn.Font, randomBtn.TextSize = Enum.Font.SourceSans, 16
-randomBtn.BackgroundColor3 = Color3.fromRGB(80,130,255)
-randomBtn.TextColor3 = Color3.new(1,1,1)
-
+-- === Click Sound
 local clickSound = Instance.new("Sound", SoundService)
-clickSound.SoundId = "rbxassetid://9118823102"; clickSound.Volume = 1
+clickSound.SoundId = "rbxassetid://9118823102"
+clickSound.Volume = 1
 
--- === ESP Logic/Animations
+-- === ESP Logic
 local espList = {}
 local function clearESP()
 	for _,gui in ipairs(espList) do
@@ -179,7 +220,8 @@ end
 
 local function createESP(petPart, petName, hatchable)
 	local gui = Instance.new("BillboardGui", petPart)
-	gui.Name ="EggESP"; gui.Size = UDim2.new(0,100,0,40)
+	gui.Name = "EggESP"
+	gui.Size = UDim2.new(0,100,0,40)
 	gui.StudsOffset = Vector3.new(0,1,0)
 	gui.AlwaysOnTop = true
 
@@ -190,16 +232,21 @@ local function createESP(petPart, petName, hatchable)
 	icon.BackgroundTransparency = 1
 
 	local label = Instance.new("TextLabel", gui)
-	label.Size = UDim2.new(1,-30,0.6,0); label.Position = UDim2.new(0.3,0,0,0)
-	label.BackgroundTransparency = 1; label.Text = petName
-	label.TextScaled, label.Font = true, Enum.Font.SourceSansBold
+	label.Size = UDim2.new(1,-30,0.6,0)
+	label.Position = UDim2.new(0.3,0,0,0)
+	label.BackgroundTransparency = 1
+	label.Text = petName
+	label.TextScaled = true
+	label.Font = Enum.Font.SourceSansBold
 	label.TextColor3 = Color3.new(1,1,1)
 
 	local status = Instance.new("TextLabel", gui)
-	status.Size = UDim2.new(1,0,0.4,0); status.Position = UDim2.new(0,0,0.6,0)
+	status.Size = UDim2.new(1,0,0.4,0)
+	status.Position = UDim2.new(0,0,0.6,0)
 	status.BackgroundTransparency = 1
 	status.Text = hatchable and "✅ Hatchable" or "❌ Not Hatchable"
-	status.TextScaled, status.Font = true, Enum.Font.SourceSans
+	status.TextScaled = true
+	status.Font = Enum.Font.SourceSans
 	status.TextColor3 = hatchable and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
 
 	spawn(function()
@@ -209,11 +256,11 @@ local function createESP(petPart, petName, hatchable)
 		end
 	end)
 
-	-- Particle effect
-	local part = petPart
-	local particle = Instance.new("ParticleEmitter", part)
-	particle.Rate, particle.Lifetime = 15, NumberRange.new(0.5,1)
-	particle.Speed, particle.Texture = NumberRange.new(1,2), "rbxassetid://296874871"
+	local particle = Instance.new("ParticleEmitter", petPart)
+	particle.Rate = 15
+	particle.Lifetime = NumberRange.new(0.5,1)
+	particle.Speed = NumberRange.new(1,2)
+	particle.Texture = "rbxassetid://296874871"
 	game.Debris:AddItem(particle, 2)
 
 	table.insert(espList, gui)
@@ -226,38 +273,46 @@ local function randomizeEggs()
 			local part = obj:FindFirstChildWhichIsA("BasePart")
 			if part then
 				local pet = eggToPets[obj.Name][math.random(#eggToPets[obj.Name])]
-				createESP(part, pet, math.random()>0.5)
+				createESP(part, pet, math.random() > 0.5)
 			end
 		end
 	end
 end
 
--- === RGB Button + Debounce
+-- === Predict Button Logic (with RGB)
 local debounce = false
 randomBtn.MouseButton1Click:Connect(function()
 	if debounce then return end
-	debounce = true; clickSound:Play()
-	local h=0; local rgbrun=true
+	debounce = true
+	clickSound:Play()
+	local h = 0
+	local rgbrun = true
 	local rgbThread = task.spawn(function()
 		while rgbrun do
-			h = (h+0.01)%1
+			h = (h + 0.01) % 1
 			randomBtn.BackgroundColor3 = Color3.fromHSV(h,1,1)
 			task.wait(0.02)
 		end
 	end)
 	randomizeEggs()
 	task.wait(10)
-	rgbrun=false; task.cancel(rgbThread)
-	randomBtn.Text, randomBtn.BackgroundColor3, debounce = "Predict Pets", Color3.fromRGB(80,130,255), false
+	rgbrun = false
+	task.cancel(rgbThread)
+	randomBtn.Text = "🔮 Predict Pets"
+	randomBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
+	debounce = false
 end)
 
--- === Buttons Logic
+-- === Button Logic
 minBtn.MouseButton1Click:Connect(function()
-	frame.Visible, minimizedIcon.Visible = false, true
+	frame.Visible = false
+	minimizedIcon.Visible = true
 end)
 minimizedIcon.MouseButton1Click:Connect(function()
-	frame.Visible, minimizedIcon.Visible = true, false
+	frame.Visible = true
+	minimizedIcon.Visible = false
 end)
 exitBtn.MouseButton1Click:Connect(function()
-	clearESP(); gui:Destroy()
+	clearESP()
+	gui:Destroy()
 end)
