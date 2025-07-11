@@ -5,17 +5,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Loading Screen
-local lg = Instance.new("ScreenGui", PlayerGui); lg.Name="LoadingScreen"; lg.ResetOnSpawn=false
-local lf = Instance.new("Frame", lg); lf.Size=UDim2.new(0,400,0,200); lf.Position=UDim2.new(0.5,-200,0.5,-100); lf.BackgroundColor3=Color3.fromRGB(15,15,15)
-local lt = Instance.new("TextLabel", lf); lt.Size=UDim2.new(1,0,0.3,0); lt.Position=UDim2.new(0,0,0,30); lt.BackgroundTransparency=1; lt.Text="GENERATING SCRIPT..."; lt.Font=Enum.Font.SourceSansBold; lt.TextSize=28; lt.TextColor3=Color3.new(1,1,1)
-local lk = Instance.new("TextLabel", lf); lk.Size=UDim2.new(1,0,0.3,0); lk.Position=UDim2.new(0,0,0.3,5); lk.BackgroundTransparency=1; lk.Font=Enum.Font.Arcade; lk.TextSize=64; lk.TextColor3=Color3.new(1,1,1); lk.Text="K"
-local bb = Instance.new("Frame", lf); bb.Size=UDim2.new(0.8,0,0.12,0); bb.Position=UDim2.new(0.1,0,0.75,0); bb.BackgroundColor3=Color3.fromRGB(50,50,50)
-local bf = Instance.new("Frame", bb); bf.Size=UDim2.new(0,0,1,0); bf.BackgroundColor3=Color3.fromRGB(0,170,255)
-task.spawn(function() local h=0; while lg.Parent do lk.TextColor3=Color3.fromHSV(h,1,1); h=(h+0.01)%1; RunService.RenderStepped:Wait(); end end)
-task.spawn(function() local d=10; local s=tick(); while tick()-s<d do bf.Size=UDim2.new((tick()-s)/d,0,1,0); RunService.RenderStepped:Wait(); end bf.Size=UDim2.new(1,0,1,0); lg:Destroy(); end)
-
--- Corrected hatch chances (total = 100% each)
+-- Hatch chances (corrected total = 100%)
 local eggToPets = {
   ["Common Egg"] = {
     {name="Golden Lab", chance=33.33},
@@ -80,7 +70,7 @@ local eggToPets = {
 
 local espList = {}
 local function clearESP()
-  for _,g in ipairs(espList) do if g and g.Parent then g:Destroy() end end
+  for _, g in ipairs(espList) do if g and g.Parent then g:Destroy() end end
   espList = {}
 end
 
@@ -106,10 +96,9 @@ end
 local function getRandomPet(eggName)
   local pool = eggToPets[eggName]
   if pool then
-    local total = 0
+    local total, cum = 0, 0
     for _, p in ipairs(pool) do total += p.chance end
     local r = math.random() * total
-    local cum = 0
     for _, p in ipairs(pool) do
       cum += p.chance
       if r <= cum then
@@ -125,16 +114,15 @@ local function randomizeEggs()
   for _, obj in ipairs(workspace:GetDescendants()) do
     if obj:IsA("Model") and eggToPets[obj.Name] then
       local part = obj:FindFirstChildWhichIsA("BasePart")
-      if part then
-        createESP(part, getRandomPet(obj.Name))
-      end
+      if part then createESP(part, getRandomPet(obj.Name)) end
     end
   end
 end
 
--- GUI Setup
+-- GUI (Initially hidden)
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "EggESP_UI"
+gui.Enabled = false
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
@@ -231,4 +219,62 @@ end)
 exitBtn.MouseButton1Click:Connect(function()
   gui:Destroy()
   clearESP()
+end)
+
+-- Loading screen (appears before GUI)
+local lg = Instance.new("ScreenGui", PlayerGui)
+lg.Name = "LoadingScreen"
+lg.ResetOnSpawn = false
+
+local lf = Instance.new("Frame", lg)
+lf.Size = UDim2.new(0, 400, 0, 200)
+lf.Position = UDim2.new(0.5, -200, 0.5, -100)
+lf.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+
+local lt = Instance.new("TextLabel", lf)
+lt.Size = UDim2.new(1, 0, 0.3, 0)
+lt.Position = UDim2.new(0, 0, 0, 30)
+lt.BackgroundTransparency = 1
+lt.Text = "GENERATING SCRIPT..."
+lt.Font = Enum.Font.SourceSansBold
+lt.TextSize = 28
+lt.TextColor3 = Color3.new(1,1,1)
+
+local lk = Instance.new("TextLabel", lf)
+lk.Size = UDim2.new(1, 0, 0.3, 0)
+lk.Position = UDim2.new(0, 0, 0.3, 5)
+lk.BackgroundTransparency = 1
+lk.Font = Enum.Font.Arcade
+lk.TextSize = 64
+lk.TextColor3 = Color3.new(1, 1, 1)
+lk.Text = "K"
+
+local bb = Instance.new("Frame", lf)
+bb.Size = UDim2.new(0.8, 0, 0.12, 0)
+bb.Position = UDim2.new(0.1, 0, 0.75, 0)
+bb.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+local bf = Instance.new("Frame", bb)
+bf.Size = UDim2.new(0, 0, 1, 0)
+bf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+task.spawn(function()
+  local h = 0
+  while lg.Parent do
+    lk.TextColor3 = Color3.fromHSV(h, 1, 1)
+    h = (h + 0.01) % 1
+    RunService.RenderStepped:Wait()
+  end
+end)
+
+task.spawn(function()
+  local d = 10
+  local s = tick()
+  while tick() - s < d do
+    bf.Size = UDim2.new((tick() - s) / d, 0, 1, 0)
+    RunService.RenderStepped:Wait()
+  end
+  bf.Size = UDim2.new(1, 0, 1, 0)
+  lg:Destroy()
+  gui.Enabled = true -- 🔥 show GUI AFTER loading
 end)
