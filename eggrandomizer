@@ -1,4 +1,4 @@
--- Grow A Garden | Egg-Only Pet ESP (Enhanced UI)
+-- Grow A Garden | Egg-Only Pet ESP (Enhanced UI with Hatch Chances)
 -- Pet Predictor by Kuni
 
 local Players = game:GetService("Players")
@@ -6,59 +6,108 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Small Loading Screen (10s)
+-- Loading Screen
 local loadingGui = Instance.new("ScreenGui", PlayerGui)
 loadingGui.Name = "LoadingScreen"
 loadingGui.ResetOnSpawn = false
 
 local loadingFrame = Instance.new("Frame", loadingGui)
-loadingFrame.Size = UDim2.new(0, 200, 0, 100)
-loadingFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+loadingFrame.Size = UDim2.new(0, 400, 0, 200)
+loadingFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
 loadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 loadingFrame.BorderSizePixel = 0
 
 local loadingText = Instance.new("TextLabel", loadingFrame)
-loadingText.Size = UDim2.new(1, 0, 0.5, 0)
-loadingText.Position = UDim2.new(0, 0, 0, 10)
+loadingText.Size = UDim2.new(1, 0, 0.3, 0)
+loadingText.Position = UDim2.new(0, 0, 0, 30)
 loadingText.BackgroundTransparency = 1
-loadingText.Text = "Generating Egg..."
+loadingText.Text = "Generating Script..."
 loadingText.Font = Enum.Font.SourceSansBold
-loadingText.TextSize = 18
+loadingText.TextSize = 28
 loadingText.TextColor3 = Color3.new(1, 1, 1)
 
 local kLogo = Instance.new("TextLabel", loadingFrame)
-kLogo.Size = UDim2.new(1, 0, 0.5, 0)
-kLogo.Position = UDim2.new(0, 0, 0.5, -10)
+kLogo.Size = UDim2.new(1, 0, 0.3, 0)
+kLogo.Position = UDim2.new(0, 0, 0.3, 5)
 kLogo.BackgroundTransparency = 1
 kLogo.Font = Enum.Font.Arcade
-kLogo.TextSize = 36
+kLogo.TextSize = 64
 kLogo.TextColor3 = Color3.new(1, 1, 1)
 kLogo.Text = "K"
 
--- Animate K Logo
+local barBackground = Instance.new("Frame", loadingFrame)
+barBackground.Size = UDim2.new(0.8, 0, 0.12, 0)
+barBackground.Position = UDim2.new(0.1, 0, 0.75, 0)
+barBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+barBackground.BorderSizePixel = 0
+
+local barFill = Instance.new("Frame", barBackground)
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+barFill.BorderSizePixel = 0
+
 task.spawn(function()
-    local hue = 0
-    while loadingGui.Parent do
-        kLogo.TextColor3 = Color3.fromHSV(hue, 1, 1)
-        hue = (hue + 0.01) % 1
-        RunService.RenderStepped:Wait()
-    end
+	local hue = 0
+	while loadingGui.Parent do
+		kLogo.TextColor3 = Color3.fromHSV(hue, 1, 1)
+		hue = (hue + 0.01) % 1
+		RunService.RenderStepped:Wait()
+	end
 end)
 
-task.wait(10)
-loadingGui:Destroy()
+task.spawn(function()
+	local duration = 10
+	local start = tick()
+	while tick() - start < duration do
+		local progress = (tick() - start) / duration
+		barFill.Size = UDim2.new(progress, 0, 1, 0)
+		RunService.RenderStepped:Wait()
+	end
+	barFill.Size = UDim2.new(1, 0, 1, 0)
+	loadingGui:Destroy()
+end)
 
--- ESP Table
+-- Pet Table with Real Hatch Chances
 local eggToPets = {
-    ["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
-    ["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
-    ["Rare Egg"]       = {"Monkey", "Orange Tabby", "Pig", "Rooster", "Spotted Deer"},
-    ["Legendary Egg"]  = {"Cow", "Silver Monkey", "Sea Otter", "Turtle", "Polar Bear"},
-    ["Mythical Egg"]   = {"Grey Mouse", "Brown Mouse", "Squirrel", "Red Giant Ant", "Red Fox"},
-    ["Bug Egg"]        = {"Snail", "Giant Ant", "Caterpillar", "Praying Mantis", "Dragonfly"},
-    ["Bee Egg"]        = {"Bee", "Honey Bee", "Bear Bee", "Petal Bee", "Queen Bee"},
-    ["Paradise Egg"]   = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
-    ["Oasis Egg"]      = {"Meerkat", "Sand Snake", "Axolotl", "Hyacinth Macaw"},
+    ["Common Egg"] = {
+        {name="Golden Lab", chance=33.33},
+        {name="Dog", chance=33.33},
+        {name="Bunny", chance=33.33},
+    },
+    ["Uncommon Egg"] = {
+        {name="Black Bunny", chance=25},
+        {name="Chicken", chance=25},
+        {name="Cat", chance=25},
+        {name="Deer", chance=25},
+    },
+    ["Rare Egg"] = {
+        {name="Orange Tabby", chance=33.33},
+        {name="Spotted Deer", chance=25},
+        {name="Pig", chance=16.67},
+        {name="Rooster", chance=16.67},
+        {name="Monkey", chance=8.33},
+    },
+    ["Legendary Egg"] = {
+        {name="Cow", chance=42.55},
+        {name="Silver Monkey", chance=42.55},
+        {name="Sea Otter", chance=10.64},
+        {name="Turtle", chance=2.13},
+        {name="Polar Bear", chance=2.13},
+    },
+    ["Mythical Egg"] = {
+        {name="Grey Mouse", chance=35.71},
+        {name="Brown Mouse", chance=26.79},
+        {name="Squirrel", chance=26.79},
+        {name="Red Giant Ant", chance=8.93},
+        {name="Red Fox", chance=1.79},
+    },
+    ["Bug Egg"] = {
+        {name="Snail", chance=40},
+        {name="Giant Ant", chance=30},
+        {name="Caterpillar", chance=25},
+        {name="Praying Mantis", chance=4},
+        {name="Dragonfly", chance=1},
+    }
 }
 
 local espList = {}
@@ -72,7 +121,7 @@ local function clearESP()
     espList = {}
 end
 
-local function createESP(part, petName)
+local function createESP(part, petDisplay)
     if part and not part:FindFirstChild("EggESP") then
         local gui = Instance.new("BillboardGui", part)
         gui.Name = "EggESP"
@@ -83,7 +132,7 @@ local function createESP(part, petName)
         local label = Instance.new("TextLabel", gui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = petName
+        label.Text = petDisplay
         label.TextColor3 = Color3.new(1, 1, 1)
         label.TextStrokeTransparency = 0.2
         label.Font = Enum.Font.SourceSansBold
@@ -97,7 +146,17 @@ end
 local function getRandomPet(eggName)
     local pool = eggToPets[eggName]
     if pool then
-        return pool[math.random(1, #pool)]
+        local total = 0
+        for _, v in ipairs(pool) do total += v.chance end
+        local r = math.random() * total
+        local cumulative = 0
+        for _, pet in ipairs(pool) do
+            cumulative += pet.chance
+            if r <= cumulative then
+                local pct = string.format("%.0f", pet.chance)
+                return pet.name .. " (" .. pct .. "%)"
+            end
+        end
     end
     return "Unknown"
 end
@@ -113,112 +172,3 @@ local function randomizeEggs()
         end
     end
 end
-
--- GUI Setup
-local gui = Instance.new("ScreenGui", PlayerGui)
-gui.Name = "EggESP_UI"
-gui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 200, 0, 140)
-frame.Position = UDim2.new(0.01, 0, 0.35, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-frame.BorderSizePixel = 3
-frame.Active = true
-frame.Draggable = true
-
--- RGB border animation
-task.spawn(function()
-    local hue = 0
-    while frame.Parent do
-        frame.BorderColor3 = Color3.fromHSV(hue, 1, 1)
-        hue = (hue + 0.01) % 1
-        RunService.RenderStepped:Wait()
-    end
-end)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, -60, 0.25, 0)
-title.Position = UDim2.new(0, 5, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "Pet Predictor By Kuni"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 18
-title.TextXAlignment = Enum.TextXAlignment.Left
-
--- Controls
-local exitBtn = Instance.new("TextButton", frame)
-exitBtn.Size = UDim2.new(0, 20, 0, 20)
-exitBtn.Position = UDim2.new(1, -22, 0, 2)
-exitBtn.Text = "❌"
-exitBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-exitBtn.TextColor3 = Color3.new(1, 1, 1)
-
-local minBtn = Instance.new("TextButton", frame)
-minBtn.Size = UDim2.new(0, 20, 0, 20)
-minBtn.Position = UDim2.new(1, -44, 0, 2)
-minBtn.Text = "–"
-minBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-minBtn.TextColor3 = Color3.new(1, 1, 1)
-
-local minimizedIcon = Instance.new("TextButton", gui)
-minimizedIcon.Size = UDim2.new(0, 140, 0, 30)
-minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
-minimizedIcon.Text = "📦 Pet Predictor"
-minimizedIcon.Visible = false
-minimizedIcon.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
-
--- Predict Button
-local predictBtn = Instance.new("TextButton", frame)
-predictBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
-predictBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
-predictBtn.Text = "🔮 Predict Pets"
-predictBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
-predictBtn.TextColor3 = Color3.new(1, 1, 1)
-
--- Light/Dark Mode Toggle
-local modeToggle = Instance.new("TextButton", frame)
-modeToggle.Size = UDim2.new(0.9, 0, 0.25, 0)
-modeToggle.Position = UDim2.new(0.05, 0, 0.7, 0)
-modeToggle.Text = "🌙 Dark Mode"
-modeToggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-modeToggle.TextColor3 = Color3.new(1, 1, 1)
-
-local isDark = true
-
-modeToggle.MouseButton1Click:Connect(function()
-    isDark = not isDark
-    frame.BackgroundColor3 = isDark and Color3.fromRGB(25, 25, 25) or Color3.fromRGB(245, 245, 245)
-    title.TextColor3 = isDark and Color3.new(1, 1, 1) or Color3.new(0, 0, 0)
-    predictBtn.TextColor3 = isDark and Color3.new(1, 1, 1) or Color3.new(0, 0, 0)
-    modeToggle.Text = isDark and "🌙 Dark Mode" or "☀️ Light Mode"
-end)
-
--- Actions
-local debounce = false
-predictBtn.MouseButton1Click:Connect(function()
-    if debounce then return end
-    debounce = true
-    predictBtn.Text = "Please wait..."
-    randomizeEggs()
-    task.wait(2)
-    predictBtn.Text = "🔮 Predict Pets"
-    debounce = false
-end)
-
-minBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    minimizedIcon.Visible = true
-end)
-
-minimizedIcon.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    minimizedIcon.Visible = false
-end)
-
-exitBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-    clearESP()
-end)
