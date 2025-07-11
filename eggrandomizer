@@ -1,11 +1,11 @@
--- Grow A Garden | Pet Predictor ESP by Kuni
--- Accurate Hatch Rates + Transformer Theme
+-- Pet Predictor by Kuni | Grow A Garden ESP (Resizable, Animated, Themed)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- 🐣 Accurate hatch percentages (July 2025)
+-- Hatch Chances (Updated July 2025)
 local eggToPets = {
   ["Common Egg"] = {
     {name="Golden Lab", chance=33.33},
@@ -70,6 +70,7 @@ local eggToPets = {
   },
 }
 
+-- Fade-in ESP
 local espList = {}
 local function clearESP()
   for _, g in ipairs(espList) do if g and g.Parent then g:Destroy() end end
@@ -83,14 +84,18 @@ local function createESP(part, petDisplay)
     gui.Size = UDim2.new(0, 100, 0, 40)
     gui.StudsOffset = Vector3.new(0, 2.5, 0)
     gui.AlwaysOnTop = true
+
     local lb = Instance.new("TextLabel", gui)
     lb.Size = UDim2.new(1, 0, 1, 0)
     lb.BackgroundTransparency = 1
     lb.Text = petDisplay
     lb.TextColor3 = Color3.new(1,1,1)
     lb.TextStrokeTransparency = 0.2
-    lb.Font = Enum.Font.SciFi
+    lb.Font = Enum.Font.Gotham
     lb.TextScaled = true
+    lb.TextTransparency = 1
+
+    TweenService:Create(lb, TweenInfo.new(1), {TextTransparency = 0}):Play()
     table.insert(espList, gui)
   end
 end
@@ -121,7 +126,7 @@ local function randomizeEggs()
   end
 end
 
--- ⏳ Loading Screen First
+-- Loading screen
 local lg = Instance.new("ScreenGui", PlayerGui)
 lg.Name = "LoadingScreen"
 lg.ResetOnSpawn = false
@@ -136,7 +141,7 @@ lt.Size = UDim2.new(1, 0, 0.3, 0)
 lt.Position = UDim2.new(0, 0, 0, 30)
 lt.BackgroundTransparency = 1
 lt.Text = "GENERATING SCRIPT..."
-lt.Font = Enum.Font.SciFi
+lt.Font = Enum.Font.GothamBold
 lt.TextSize = 28
 lt.TextColor3 = Color3.new(1,1,1)
 
@@ -158,7 +163,6 @@ local bf = Instance.new("Frame", bb)
 bf.Size = UDim2.new(0, 0, 1, 0)
 bf.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 
--- Rainbow loading animation
 task.spawn(function()
   local h = 0
   while lg.Parent do
@@ -168,7 +172,6 @@ task.spawn(function()
   end
 end)
 
--- Wait then show GUI
 task.spawn(function()
   local d = 10
   local s = tick()
@@ -176,85 +179,113 @@ task.spawn(function()
     bf.Size = UDim2.new((tick() - s) / d, 0, 1, 0)
     RunService.RenderStepped:Wait()
   end
+  bf.Size = UDim2.new(1, 0, 1, 0)
   lg:Destroy()
 
-  -- 🌟 Pet Predictor GUI
+  -- GUI Main
   local gui = Instance.new("ScreenGui", PlayerGui)
   gui.Name = "EggESP_UI"
-  gui.Enabled = true
   gui.ResetOnSpawn = false
+  gui.Enabled = true
 
   local frame = Instance.new("Frame", gui)
-  frame.Size = UDim2.new(0,200,0,140)
-  frame.Position = UDim2.new(0.01,0,0.35,0)
+  frame.Size = UDim2.new(0, 250, 0, 160)
+  frame.Position = UDim2.new(0.01, 0, 0.3, 0)
   frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
   frame.BorderSizePixel = 2
   frame.Active = true
   frame.Draggable = true
+  frame.ClipsDescendants = false
+
+  local UIS = game:GetService("UserInputService")
+  local resizing = false
+
+  local resizeHandle = Instance.new("Frame", frame)
+  resizeHandle.Size = UDim2.new(0, 20, 0, 20)
+  resizeHandle.Position = UDim2.new(1, -20, 1, -20)
+  resizeHandle.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+  resizeHandle.BorderSizePixel = 0
+  resizeHandle.Name = "ResizeHandle"
+  resizeHandle.ZIndex = 10
+
+  resizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then resizing = true end
+  end)
+  UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then resizing = false end
+  end)
+  UIS.InputChanged:Connect(function(input)
+    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+      local delta = input.Position - frame.AbsolutePosition
+      frame.Size = UDim2.new(0, math.clamp(delta.X, 150, 500), 0, math.clamp(delta.Y, 120, 400))
+    end
+  end)
 
   task.spawn(function()
     local h = 0
     while frame.Parent do
-      frame.BorderColor3 = Color3.fromHSV(h,0.8,1)
+      frame.BorderColor3 = Color3.fromHSV(h, 0.8, 1)
       h = (h + 0.01) % 1
       RunService.RenderStepped:Wait()
     end
   end)
 
   local title = Instance.new("TextLabel", frame)
-  title.Size = UDim2.new(1,-60,0.25,0)
-  title.Position = UDim2.new(0,5,0,0)
+  title.Size = UDim2.new(1, -60, 0.25, 0)
+  title.Position = UDim2.new(0, 5, 0, 0)
   title.BackgroundTransparency = 1
   title.Text = "Pet Predictor By Kuni"
-  title.TextColor3 = Color3.fromRGB(0,200,255)
-  title.Font = Enum.Font.GothamBlack
-  title.TextSize = 18
+  title.TextColor3 = Color3.fromRGB(0, 200, 255)
+  title.Font = Enum.Font.GothamBold
+  title.TextSize = 20
   title.TextXAlignment = Enum.TextXAlignment.Left
 
   local exitBtn = Instance.new("TextButton", frame)
-  exitBtn.Size = UDim2.new(0,20,0,20)
-  exitBtn.Position = UDim2.new(1,-22,0,2)
+  exitBtn.Size = UDim2.new(0, 20, 0, 20)
+  exitBtn.Position = UDim2.new(1, -22, 0, 2)
   exitBtn.Text = "❌"
   exitBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
   exitBtn.TextColor3 = Color3.new(1,1,1)
 
   local minBtn = Instance.new("TextButton", frame)
-  minBtn.Size = UDim2.new(0,20,0,20)
-  minBtn.Position = UDim2.new(1,-44,0,2)
+  minBtn.Size = UDim2.new(0, 20, 0, 20)
+  minBtn.Position = UDim2.new(1, -44, 0, 2)
   minBtn.Text = "–"
   minBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
   minBtn.TextColor3 = Color3.new(1,1,1)
 
   local minimizedIcon = Instance.new("TextButton", gui)
-  minimizedIcon.Size = UDim2.new(0,140,0,30)
-  minimizedIcon.Position = UDim2.new(0,10,1,-40)
+  minimizedIcon.Size = UDim2.new(0, 140, 0, 30)
+  minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
   minimizedIcon.Text = "Pet Predictor"
   minimizedIcon.Visible = false
-  minimizedIcon.BackgroundColor3 = Color3.fromRGB(30,30,40)
-  minimizedIcon.TextColor3 = Color3.new(1,1,1)
+  minimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+  minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
 
   local predictBtn = Instance.new("TextButton", frame)
-  predictBtn.Size = UDim2.new(0.9,0,0.3,0)
-  predictBtn.Position = UDim2.new(0.05,0,0.35,0)
+  predictBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
+  predictBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
   predictBtn.Text = "Predict Pets"
-  predictBtn.BackgroundColor3 = Color3.fromRGB(0,120,255)
-  predictBtn.TextColor3 = Color3.new(1,1,1)
-  predictBtn.Font = Enum.Font.SciFi
+  predictBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+  predictBtn.TextColor3 = Color3.new(1, 1, 1)
+  predictBtn.Font = Enum.Font.GothamBold
+  predictBtn.TextSize = 18
 
   local modeToggle = Instance.new("TextButton", frame)
-  modeToggle.Size = UDim2.new(0.9,0,0.25,0)
-  modeToggle.Position = UDim2.new(0.05,0,0.7,0)
+  modeToggle.Size = UDim2.new(0.9, 0, 0.25, 0)
+  modeToggle.Position = UDim2.new(0.05, 0, 0.7, 0)
   modeToggle.Text = "Dark Mode"
-  modeToggle.BackgroundColor3 = Color3.fromRGB(255,200,0)
-  modeToggle.TextColor3 = Color3.new(0,0,0)
-  modeToggle.Font = Enum.Font.SciFi
+  modeToggle.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+  modeToggle.TextColor3 = Color3.new(0, 0, 0)
+  modeToggle.Font = Enum.Font.Gotham
+  modeToggle.TextSize = 16
 
   local isDark = true
   modeToggle.MouseButton1Click:Connect(function()
     isDark = not isDark
-    frame.BackgroundColor3 = isDark and Color3.fromRGB(25,25,35) or Color3.fromRGB(230,230,230)
-    title.TextColor3 = isDark and Color3.fromRGB(0,200,255) or Color3.new(0,0,0)
-    predictBtn.TextColor3 = isDark and Color3.new(1,1,1) or Color3.new(0,0,0)
+    frame.BackgroundColor3 = isDark and Color3.fromRGB(25, 25, 35) or Color3.fromRGB(230, 230, 230)
+    title.TextColor3 = isDark and Color3.fromRGB(0, 200, 255) or Color3.new(0, 0, 0)
+    predictBtn.TextColor3 = isDark and Color3.new(1, 1, 1) or Color3.new(0, 0, 0)
     modeToggle.Text = isDark and "Dark Mode" or "Light Mode"
   end)
 
