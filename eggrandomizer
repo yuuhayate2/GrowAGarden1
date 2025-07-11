@@ -13,7 +13,7 @@ loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 loadingFrame.BorderSizePixel = 0
 loadingFrame.Parent = loadingGui
 
--- K Logo (Text-Based)
+-- K Logo
 local logoLabel = Instance.new("TextLabel")
 logoLabel.Size = UDim2.new(0, 120, 0, 120)
 logoLabel.Position = UDim2.new(0.5, -60, 0.4, -60)
@@ -24,21 +24,16 @@ logoLabel.Font = Enum.Font.GothamBlack
 logoLabel.TextScaled = true
 logoLabel.Parent = loadingFrame
 
--- Animate Logo Pulse
+-- Animate Logo Pulse (single loop, not infinite)
 task.spawn(function()
-	while true do
-		for scale = 1, 10 do
-			logoLabel.Size = UDim2.new(0, 120 + scale, 0, 120 + scale)
-			task.wait(0.03)
-		end
-		for scale = 10, 1, -1 do
-			logoLabel.Size = UDim2.new(0, 120 + scale, 0, 120 + scale)
-			task.wait(0.03)
-		end
+	for t = 1, 20 do
+		local scale = 10 * math.sin(t/2)
+		logoLabel.Size = UDim2.new(0, 120 + scale, 0, 120 + scale)
+		task.wait(0.1)
 	end
 end)
 
--- Loading Text with Dots
+-- Loading Text
 local loadingText = Instance.new("TextLabel")
 loadingText.Size = UDim2.new(0, 350, 0, 50)
 loadingText.Position = UDim2.new(0.5, -175, 0.6, 0)
@@ -63,6 +58,7 @@ end)
 -- Wait 10 seconds
 task.wait(10)
 running = false
+
 for i = 0, 1, 0.05 do
 	loadingFrame.BackgroundTransparency = i
 	logoLabel.TextTransparency = i
@@ -71,7 +67,7 @@ for i = 0, 1, 0.05 do
 end
 loadingGui:Destroy()
 
--- 🥚 Egg to Pet Table
+-- Egg/Pet Data
 local eggToPets = {
 	["Common Egg"]     = {"Dog", "Golden Lab", "Bunny"},
 	["Uncommon Egg"]   = {"Black Bunny", "Cat", "Chicken", "Deer"},
@@ -96,24 +92,25 @@ local function clearESP()
 end
 
 local function createESP(part, petName, isHatchable)
-	if part and not part:FindFirstChild("EggESP") then
-		local gui = Instance.new("BillboardGui", part)
+	if part then
+		local gui = Instance.new("BillboardGui")
 		gui.Name = "EggESP"
 		gui.Size = UDim2.new(0, 100, 0, 40)
 		gui.StudsOffset = Vector3.new(0, 2.5, 0)
 		gui.AlwaysOnTop = true
+		gui.Parent = part
 
-		local label = Instance.new("TextLabel", gui)
+		local label = Instance.new("TextLabel")
 		label.Size = UDim2.new(1, 0, 0.6, 0)
-		label.Position = UDim2.new(0, 0, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Text = petName
 		label.TextColor3 = Color3.new(1, 1, 1)
 		label.TextStrokeTransparency = 0.5
 		label.Font = Enum.Font.SourceSansBold
 		label.TextScaled = true
+		label.Parent = gui
 
-		local status = Instance.new("TextLabel", gui)
+		local status = Instance.new("TextLabel")
 		status.Size = UDim2.new(1, 0, 0.4, 0)
 		status.Position = UDim2.new(0, 0, 0.6, 0)
 		status.BackgroundTransparency = 1
@@ -121,6 +118,7 @@ local function createESP(part, petName, isHatchable)
 		status.TextColor3 = isHatchable and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 		status.Font = Enum.Font.SourceSans
 		status.TextScaled = true
+		status.Parent = gui
 
 		table.insert(espList, gui)
 	end
@@ -141,14 +139,28 @@ local function randomizeEggs()
 			local part = obj:FindFirstChildWhichIsA("BasePart")
 			if part then
 				local petName = getRandomPet(obj.Name)
-				local hatchable = math.random(1, 2) == 1
-				createESP(part, petName, hatchable)
+				local isHatchable = math.random() > 0.5
+				createESP(part, petName, isHatchable)
 			end
 		end
 	end
 end
 
--- 📦 Main GUI
+-- 🌈 RGB function
+local rgbRunning = false
+local function startRGB(btn)
+	rgbRunning = true
+	task.spawn(function()
+		local h = 0
+		while rgbRunning do
+			h = (h + 0.01) % 1
+			btn.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+			task.wait(0.02)
+		end
+	end)
+end
+
+-- 📦 GUI
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "EggESP_UI"
 gui.ResetOnSpawn = false
@@ -161,7 +173,6 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
--- 🏷️ Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0.25, 0)
 title.Position = UDim2.new(0, 5, 0, 0)
@@ -172,7 +183,7 @@ title.Font = Enum.Font.SourceSans
 title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- ❌ Exit Button
+-- ❌ Close
 local exitBtn = Instance.new("TextButton", frame)
 exitBtn.Size = UDim2.new(0, 20, 0, 20)
 exitBtn.Position = UDim2.new(1, -22, 0, 2)
@@ -182,7 +193,7 @@ exitBtn.TextColor3 = Color3.new(1, 1, 1)
 exitBtn.Font = Enum.Font.SourceSans
 exitBtn.TextSize = 14
 
--- ➖ Minimize Button
+-- ➖ Minimize
 local minBtn = Instance.new("TextButton", frame)
 minBtn.Size = UDim2.new(0, 20, 0, 20)
 minBtn.Position = UDim2.new(1, -44, 0, 2)
@@ -192,7 +203,7 @@ minBtn.TextColor3 = Color3.new(1, 1, 1)
 minBtn.Font = Enum.Font.SourceSans
 minBtn.TextSize = 18
 
--- 🔳 Minimized Icon
+-- 🔳 Restore
 local minimizedIcon = Instance.new("TextButton", gui)
 minimizedIcon.Size = UDim2.new(0, 120, 0, 30)
 minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
@@ -203,7 +214,7 @@ minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
 minimizedIcon.Font = Enum.Font.SourceSans
 minimizedIcon.TextSize = 14
 
--- 🔁 Randomize Button
+-- 🔁 Random Button
 local randomBtn = Instance.new("TextButton", frame)
 randomBtn.Size = UDim2.new(0.9, 0, 0.5, 0)
 randomBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
@@ -213,44 +224,31 @@ randomBtn.TextColor3 = Color3.new(1, 1, 1)
 randomBtn.Font = Enum.Font.SourceSans
 randomBtn.TextSize = 14
 
--- 🌈 RGB Animation
-local function RGBEffect()
-	local hue = 0
-	while randomBtn.Text == "Please wait..." do
-		hue = (hue + 0.02) % 1
-		local color = Color3.fromHSV(hue, 1, 1)
-		randomBtn.BackgroundColor3 = color
-		task.wait(0.05)
-	end
-	randomBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
-end
-
--- 🧊 Debounce Protection
+-- Debounce
 local debounce = false
 randomBtn.MouseButton1Click:Connect(function()
 	if debounce then return end
 	debounce = true
 	randomBtn.Text = "Please wait..."
-	task.spawn(RGBEffect)
+	startRGB(randomBtn)
 	randomizeEggs()
 	task.wait(2)
+	rgbRunning = false
 	randomBtn.Text = "Randomize Pets"
+	randomBtn.BackgroundColor3 = Color3.fromRGB(80, 130, 255)
 	debounce = false
 end)
 
--- ⬇️ Minimize Logic
+-- Minimize / Restore
 minBtn.MouseButton1Click:Connect(function()
 	frame.Visible = false
 	minimizedIcon.Visible = true
 end)
-
--- ⬆️ Restore from Minimized
 minimizedIcon.MouseButton1Click:Connect(function()
 	frame.Visible = true
 	minimizedIcon.Visible = false
 end)
 
--- ❌ Close Button Logic
 exitBtn.MouseButton1Click:Connect(function()
 	clearESP()
 	gui:Destroy()
