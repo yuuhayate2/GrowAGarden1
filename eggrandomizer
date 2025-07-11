@@ -1,8 +1,61 @@
--- Grow A Garden | Egg-Only Pet ESP (Enhanced UI)
--- Pet Predictor by Kuni
-
 local Players = game:GetService("Players")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- 🔄 Loading Screen
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "LoadingScreen"
+loadingGui.ResetOnSpawn = false
+loadingGui.Parent = PlayerGui
+
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+loadingFrame.BorderSizePixel = 0
+loadingFrame.Parent = loadingGui
+
+-- K Logo (Text-Based)
+local logoLabel = Instance.new("TextLabel")
+logoLabel.Size = UDim2.new(0, 120, 0, 120)
+logoLabel.Position = UDim2.new(0.5, -60, 0.4, -60)
+logoLabel.BackgroundTransparency = 1
+logoLabel.Text = "K"
+logoLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+logoLabel.Font = Enum.Font.GothamBlack
+logoLabel.TextScaled = true
+logoLabel.Parent = loadingFrame
+
+-- Loading Text with Dots
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(0, 350, 0, 50)
+loadingText.Position = UDim2.new(0.5, -175, 0.6, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.TextColor3 = Color3.new(1, 1, 1)
+loadingText.Font = Enum.Font.SourceSansBold
+loadingText.TextSize = 24
+loadingText.Text = "🔄 Generating Egg Predictor"
+loadingText.Parent = loadingFrame
+
+-- Animate Dots
+local running = true
+task.spawn(function()
+	while running do
+		for i = 0, 3 do
+			loadingText.Text = "🔄 Generating Egg Predictor" .. string.rep(".", i)
+			task.wait(0.4)
+		end
+	end
+end)
+
+-- Fade Out After Delay
+task.wait(2)
+running = false
+for i = 0, 1, 0.05 do
+	loadingFrame.BackgroundTransparency = i
+	logoLabel.TextTransparency = i
+	loadingText.TextTransparency = i
+	task.wait(0.03)
+end
+loadingGui:Destroy()
 
 -- 🥚 Egg to Pet Table
 local eggToPets = {
@@ -20,57 +73,57 @@ local eggToPets = {
 local espList = {}
 
 local function clearESP()
-    for _, gui in pairs(espList) do
-        if gui and gui.Parent then
-            gui:Destroy()
-        end
-    end
-    espList = {}
+	for _, gui in ipairs(espList) do
+		if gui and gui.Parent then
+			gui:Destroy()
+		end
+	end
+	espList = {}
 end
 
 local function createESP(part, petName)
-    if part and not part:FindFirstChild("EggESP") then
-        local gui = Instance.new("BillboardGui", part)
-        gui.Name = "EggESP"
-        gui.Size = UDim2.new(0, 100, 0, 40)
-        gui.StudsOffset = Vector3.new(0, 2.5, 0)
-        gui.AlwaysOnTop = true
+	if part and not part:FindFirstChild("EggESP") then
+		local gui = Instance.new("BillboardGui", part)
+		gui.Name = "EggESP"
+		gui.Size = UDim2.new(0, 100, 0, 40)
+		gui.StudsOffset = Vector3.new(0, 2.5, 0)
+		gui.AlwaysOnTop = true
 
-        local label = Instance.new("TextLabel", gui)
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.Text = petName
-        label.TextColor3 = Color3.new(1, 1, 1)
-        label.TextStrokeTransparency = 0.5
-        label.Font = Enum.Font.SourceSans
-        label.TextScaled = true
+		local label = Instance.new("TextLabel", gui)
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Text = petName
+		label.TextColor3 = Color3.new(1, 1, 1)
+		label.TextStrokeTransparency = 0.5
+		label.Font = Enum.Font.SourceSans
+		label.TextScaled = true
 
-        gui.Parent = part
-        table.insert(espList, gui)
-    end
+		gui.Parent = part
+		table.insert(espList, gui)
+	end
 end
 
 local function getRandomPet(eggName)
-    local pool = eggToPets[eggName]
-    if pool then
-        return pool[math.random(1, #pool)]
-    end
-    return "Unknown"
+	local pool = eggToPets[eggName]
+	if pool then
+		return pool[math.random(1, #pool)]
+	end
+	return "Unknown"
 end
 
 local function randomizeEggs()
-    clearESP()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") and eggToPets[obj.Name] then
-            local part = obj:FindFirstChildWhichIsA("BasePart")
-            if part then
-                createESP(part, getRandomPet(obj.Name))
-            end
-        end
-    end
+	clearESP()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and eggToPets[obj.Name] then
+			local part = obj:FindFirstChildWhichIsA("BasePart")
+			if part then
+				createESP(part, getRandomPet(obj.Name))
+			end
+		end
+	end
 end
 
--- GUI Setup
+-- 📦 Main GUI
 local gui = Instance.new("ScreenGui", PlayerGui)
 gui.Name = "EggESP_UI"
 gui.ResetOnSpawn = false
@@ -83,7 +136,7 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
--- Title
+-- 🏷️ Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, -40, 0.25, 0)
 title.Position = UDim2.new(0, 5, 0, 0)
@@ -94,7 +147,7 @@ title.Font = Enum.Font.SourceSans
 title.TextSize = 18
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Exit Button (X)
+-- ❌ Exit Button
 local exitBtn = Instance.new("TextButton", frame)
 exitBtn.Size = UDim2.new(0, 20, 0, 20)
 exitBtn.Position = UDim2.new(1, -22, 0, 2)
@@ -104,7 +157,7 @@ exitBtn.TextColor3 = Color3.new(1, 1, 1)
 exitBtn.Font = Enum.Font.SourceSans
 exitBtn.TextSize = 14
 
--- Minimize Button (_)
+-- ➖ Minimize Button
 local minBtn = Instance.new("TextButton", frame)
 minBtn.Size = UDim2.new(0, 20, 0, 20)
 minBtn.Position = UDim2.new(1, -44, 0, 2)
@@ -114,7 +167,7 @@ minBtn.TextColor3 = Color3.new(1, 1, 1)
 minBtn.Font = Enum.Font.SourceSans
 minBtn.TextSize = 18
 
--- Minimized icon
+-- 🔳 Minimized Icon
 local minimizedIcon = Instance.new("TextButton", gui)
 minimizedIcon.Size = UDim2.new(0, 120, 0, 30)
 minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
@@ -125,7 +178,7 @@ minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
 minimizedIcon.Font = Enum.Font.SourceSans
 minimizedIcon.TextSize = 14
 
--- Randomize Button
+-- 🔁 Randomize Button
 local randomBtn = Instance.new("TextButton", frame)
 randomBtn.Size = UDim2.new(0.9, 0, 0.5, 0)
 randomBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
@@ -135,32 +188,32 @@ randomBtn.TextColor3 = Color3.new(1, 1, 1)
 randomBtn.Font = Enum.Font.SourceSans
 randomBtn.TextSize = 14
 
--- Anti-Spam Debounce
+-- 🧊 Debounce Protection
 local debounce = false
 randomBtn.MouseButton1Click:Connect(function()
-    if debounce then return end
-    debounce = true
-    randomBtn.Text = "Please wait..."
-    randomizeEggs()
-    task.wait(2)
-    randomBtn.Text = "Randomize Pets"
-    debounce = false
+	if debounce then return end
+	debounce = true
+	randomBtn.Text = "Please wait..."
+	randomizeEggs()
+	task.wait(2)
+	randomBtn.Text = "Randomize Pets"
+	debounce = false
 end)
 
--- Minimize Button Logic
+-- ⬇️ Minimize Logic
 minBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    minimizedIcon.Visible = true
+	frame.Visible = false
+	minimizedIcon.Visible = true
 end)
 
--- Restore from Minimized
+-- ⬆️ Restore from Minimized
 minimizedIcon.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    minimizedIcon.Visible = false
+	frame.Visible = true
+	minimizedIcon.Visible = false
 end)
 
--- Exit Button Logic
+-- ❌ Close Button Logic
 exitBtn.MouseButton1Click:Connect(function()
-    clearESP()
-    gui:Destroy()
+	clearESP()
+	gui:Destroy()
 end)
