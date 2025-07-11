@@ -70,7 +70,7 @@ local eggToPets = {
   },
 }
 
--- Fade-in ESP
+-- ESP logic
 local espList = {}
 local function clearESP()
   for _, g in ipairs(espList) do if g and g.Parent then g:Destroy() end end
@@ -126,7 +126,7 @@ local function randomizeEggs()
   end
 end
 
--- Loading screen
+-- Animated Loading Screen
 local lg = Instance.new("ScreenGui", PlayerGui)
 lg.Name = "LoadingScreen"
 lg.ResetOnSpawn = false
@@ -182,7 +182,7 @@ task.spawn(function()
   bf.Size = UDim2.new(1, 0, 1, 0)
   lg:Destroy()
 
-  -- GUI Main
+  -- GUI Setup
   local gui = Instance.new("ScreenGui", PlayerGui)
   gui.Name = "EggESP_UI"
   gui.ResetOnSpawn = false
@@ -243,14 +243,14 @@ task.spawn(function()
   local exitBtn = Instance.new("TextButton", frame)
   exitBtn.Size = UDim2.new(0, 20, 0, 20)
   exitBtn.Position = UDim2.new(1, -22, 0, 2)
-  exitBtn.Text = "❌"
+  exitBtn.Text = "X"
   exitBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
   exitBtn.TextColor3 = Color3.new(1,1,1)
 
   local minBtn = Instance.new("TextButton", frame)
   minBtn.Size = UDim2.new(0, 20, 0, 20)
   minBtn.Position = UDim2.new(1, -44, 0, 2)
-  minBtn.Text = "–"
+  minBtn.Text = "-"
   minBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
   minBtn.TextColor3 = Color3.new(1,1,1)
 
