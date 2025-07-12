@@ -1,6 +1,3 @@
-
-Here is the full, clean version of the Kuni Hub ESP script with no comments, ready to copy-paste directly into your game. All features work perfectly (loading screen, ESP, anti-spam, smooth UI, buttons):
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -263,15 +260,3 @@ exit.MouseButton1Click:Connect(function()
 	gui:Destroy()
 	clearESP()
 end)
-
-If you'd like this version with:
-
-Button hover sound effects 🎵
-
-Extra eggs or future update support
-
-Pet preview gallery
-
-
-Just ask!
-
