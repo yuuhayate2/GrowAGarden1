@@ -1,1 +1,2 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Devluatech/Egg-Predictor-By-Kuny/refs/heads/main/eggpredictor"))()
 loadstring(game:HttpGet("https://cdn.sourceb.in/bins/N8iYGWgvgp/0", true))()
