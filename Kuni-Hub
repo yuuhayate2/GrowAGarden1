@@ -1,4 +1,4 @@
--- Kuni Hub | Full Visual Pet Spawner with Realistic Models & Movement -- Models: Raccoon, Mimic Octopus, Butterfly, Disco Bee, Queen Bee, Dragonfly, Fennec Fox, Red Fox, T-Rex -- Visual-only, flying/walking effects, sounds, sparkle trails
+-- Kuni Hub | Pet Spawner (Cartoon Blue Theme) -- Visual-only with custom models, cartoon-blue UI, particles, movement, and sounds
 
 local Players = game:GetService("Players") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService") local player = Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait()
 
@@ -6,13 +6,15 @@ local PetModels = { ["Raccoon"] = "rbxassetid://18534285876", ["Mimic Octopus"] 
 
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui")) gui.Name = "KuniSpawner"
 
-local frame = Instance.new("Frame", gui) frame.Size = UDim2.new(0, 300, 0, 180) frame.Position = UDim2.new(0.05, 0, 0.4, 0) frame.BackgroundColor3 = Color3.fromRGB(30,30,30) frame.Active = true frame.Draggable = true Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+local frame = Instance.new("Frame", gui) frame.Size = UDim2.new(0, 320, 0, 200) frame.Position = UDim2.new(0.05, 0, 0.4, 0) frame.BackgroundColor3 = Color3.fromRGB(41, 128, 255) frame.BorderSizePixel = 0 frame.Active = true frame.Draggable = true Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
-local title = Instance.new("TextLabel", frame) title.Text = "Pet Spawner by Kuni" title.Size = UDim2.new(1, 0, 0, 40) title.TextColor3 = Color3.fromRGB(255,255,255) title.BackgroundTransparency = 1 title.Font = Enum.Font.GothamBold title.TextSize = 22
+local shadow = Instance.new("ImageLabel", frame) shadow.BackgroundTransparency = 1 shadow.Image = "rbxassetid://1316045217" shadow.ScaleType = Enum.ScaleType.Slice shadow.SliceCenter = Rect.new(10, 10, 118, 118) shadow.Size = UDim2.new(1, 20, 1, 20) shadow.Position = UDim2.new(0, -10, 0, -10) shadow.ImageColor3 = Color3.new(0, 0, 0) shadow.ImageTransparency = 0.6
 
-local input = Instance.new("TextBox", frame) input.PlaceholderText = "Enter pet name (e.g. Raccoon)" input.Size = UDim2.new(1, -20, 0, 35) input.Position = UDim2.new(0, 10, 0, 50) input.Font = Enum.Font.Gotham input.TextColor3 = Color3.new(1, 1, 1) input.BackgroundColor3 = Color3.fromRGB(40, 40, 40) input.TextSize = 18 input.ClearTextOnFocus = false
+local title = Instance.new("TextLabel", frame) title.Text = "Pet Spawner by Kuni" title.Size = UDim2.new(1, 0, 0, 40) title.TextColor3 = Color3.fromRGB(255, 255, 255) title.BackgroundTransparency = 1 title.Font = Enum.Font.FredokaOne title.TextSize = 24
 
-local button = Instance.new("TextButton", frame) button.Text = "Spawn Pet" button.Size = UDim2.new(1, -20, 0, 40) button.Position = UDim2.new(0, 10, 0, 100) button.BackgroundColor3 = Color3.fromRGB(50, 130, 200) button.Font = Enum.Font.GothamBold button.TextColor3 = Color3.new(1, 1, 1) button.TextSize = 20
+local input = Instance.new("TextBox", frame) input.PlaceholderText = "Enter pet name (e.g. Raccoon)" input.Size = UDim2.new(1, -20, 0, 35) input.Position = UDim2.new(0, 10, 0, 50) input.Font = Enum.Font.FredokaOne input.TextColor3 = Color3.new(1, 1, 1) input.BackgroundColor3 = Color3.fromRGB(230, 240, 255) input.TextSize = 18 input.ClearTextOnFocus = false Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
+
+local button = Instance.new("TextButton", frame) button.Text = "Spawn Pet" button.Size = UDim2.new(1, -20, 0, 40) button.Position = UDim2.new(0, 10, 0, 100) button.BackgroundColor3 = Color3.fromRGB(0, 102, 204) button.Font = Enum.Font.FredokaOne button.TextColor3 = Color3.new(1, 1, 1) button.TextSize = 20 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
 
 local function createEffect(part, flying) local effect = Instance.new("ParticleEmitter") effect.Texture = "rbxassetid://48384130" effect.Size = NumberSequence.new(0.3) effect.Rate = 15 effect.Speed = NumberRange.new(0.5) effect.LightEmission = 0.7 effect.Parent = part
 
@@ -43,21 +45,12 @@ model:SetPrimaryPartCFrame(CFrame.new(root))
 local isFlying = (petName:lower():find("bee") or petName == "Butterfly" or petName == "Dragonfly")
 createEffect(model.PrimaryPart, isFlying)
 
-if isFlying then
-    local sound = Instance.new("Sound", model.PrimaryPart)
-    sound.SoundId = "rbxassetid://9118823103"
-    sound.Looped = true
-    sound.Volume = 0.4
-    sound:Play()
-else
-    local sound = Instance.new("Sound", model.PrimaryPart)
-    sound.SoundId = "rbxassetid://9118827881"
-    sound.Looped = true
-    sound.Volume = 0.3
-    sound:Play()
-end
+local sound = Instance.new("Sound", model.PrimaryPart)
+sound.SoundId = isFlying and "rbxassetid://9118823103" or "rbxassetid://9118827881"
+sound.Looped = true
+sound.Volume = 0.4
+sound:Play()
 
--- Movement loop
 coroutine.wrap(function()
     while model and model.Parent do
         local target = root + Vector3.new(math.random(-15,15), 0, math.random(-15,15))
