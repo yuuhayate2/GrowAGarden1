@@ -1,55 +1,86 @@
--- Pet Predictor + Visual Pet Spawner by Kuni | Grow A Garden (Part 1)
+-- Kuni Hub | Pet Predictor + Pet Spawner
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
--- Pet Hatch Chances (updated July 2025)
+-- Pet Data
+local divinePets = {
+  "Queen Bee", "Mimic Octopus", "Dragonfly", "Raccoon", "T-Rex",
+  "Red Fox", "Fennec Fox", "Brontosaurus", "Hyacinth Macaw",
+  "Scarlet Macaw", "Silver Monkey"
+}
+
 local eggToPets = {
   ["Common Egg"] = {
-    {name="Golden Lab", chance=33.33}, {name="Dog", chance=33.33}, {name="Bunny", chance=33.34},
+    {name="Golden Lab", chance=33.33},
+    {name="Dog", chance=33.33},
+    {name="Bunny", chance=33.34},
   },
   ["Uncommon Egg"] = {
-    {name="Black Bunny", chance=25}, {name="Chicken", chance=25}, {name="Cat", chance=25}, {name="Deer", chance=25},
+    {name="Black Bunny", chance=25},
+    {name="Chicken", chance=25},
+    {name="Cat", chance=25},
+    {name="Deer", chance=25},
   },
   ["Rare Egg"] = {
-    {name="Orange Tabby", chance=33.33}, {name="Spotted Deer", chance=25}, {name="Pig", chance=16.67},
-    {name="Rooster", chance=16.67}, {name="Monkey", chance=8.33},
+    {name="Orange Tabby", chance=33.33},
+    {name="Spotted Deer", chance=25},
+    {name="Pig", chance=16.67},
+    {name="Rooster", chance=16.67},
+    {name="Monkey", chance=8.33},
   },
   ["Legendary Egg"] = {
-    {name="Cow", chance=42.55}, {name="Silver Monkey", chance=42.55}, {name="Sea Otter", chance=10.64},
-    {name="Turtle", chance=2.13}, {name="Polar Bear", chance=2.13},
+    {name="Cow", chance=42.55},
+    {name="Silver Monkey", chance=42.55},
+    {name="Sea Otter", chance=10.64},
+    {name="Turtle", chance=2.13},
+    {name="Polar Bear", chance=2.13},
   },
   ["Mythical Egg"] = {
-    {name="Grey Mouse", chance=35.71}, {name="Brown Mouse", chance=26.79}, {name="Squirrel", chance=26.79},
-    {name="Red Giant Ant", chance=8.93}, {name="Red Fox", chance=1.79},
+    {name="Grey Mouse", chance=35.71},
+    {name="Brown Mouse", chance=26.79},
+    {name="Squirrel", chance=26.79},
+    {name="Red Giant Ant", chance=8.93},
+    {name="Red Fox", chance=1.79},
   },
   ["Bug Egg"] = {
-    {name="Snail", chance=40}, {name="Giant Ant", chance=30}, {name="Caterpillar", chance=25},
-    {name="Praying Mantis", chance=4}, {name="Dragonfly", chance=1},
+    {name="Snail", chance=40},
+    {name="Giant Ant", chance=30},
+    {name="Caterpillar", chance=25},
+    {name="Praying Mantis", chance=4},
+    {name="Dragonfly", chance=1},
   },
   ["Paradise Egg"] = {
-    {name="Ostrich", chance=40}, {name="Peacock", chance=30}, {name="Capybara", chance=21},
-    {name="Scarlet Macaw", chance=8}, {name="Mimic Octopus", chance=1},
+    {name="Ostrich", chance=40},
+    {name="Peacock", chance=30},
+    {name="Capybara", chance=21},
+    {name="Scarlet Macaw", chance=8},
+    {name="Mimic Octopus", chance=1},
   },
   ["Oasis Egg"] = {
-    {name="Meerkat", chance=45}, {name="Sand Snake", chance=34.5}, {name="Axolotl", chance=15},
-    {name="Hyacinth Macaw", chance=5}, {name="Fennec Fox", chance=0.5},
+    {name="Meerkat", chance=45},
+    {name="Sand Snake", chance=34.5},
+    {name="Axolotl", chance=15},
+    {name="Hyacinth Macaw", chance=5},
+    {name="Fennec Fox", chance=0.5},
   },
   ["Dinosaur Egg"] = {
-    {name="Raptor", chance=35}, {name="Triceratops", chance=32.5}, {name="Stegosaurus", chance=29},
-    {name="Pterodactyl", chance=3}, {name="Brontosaurus", chance=1}, {name="T-Rex", chance=0.5},
+    {name="Raptor", chance=35},
+    {name="Triceratops", chance=32.5},
+    {name="Stegosaurus", chance=29},
+    {name="Pterodactyl", chance=3},
+    {name="Brontosaurus", chance=1},
+    {name="T-Rex", chance=0.5},
   },
 }
 
--- ESP + Predictor (Part 2)
-
+-- ESP
 local espList = {}
-
 local function clearESP()
   for _, g in ipairs(espList) do if g and g.Parent then g:Destroy() end end
   espList = {}
@@ -67,7 +98,7 @@ local function createESP(part, petDisplay)
     lb.Size = UDim2.new(1, 0, 1, 0)
     lb.BackgroundTransparency = 1
     lb.Text = petDisplay
-    lb.TextColor3 = Color3.new(1,1,1)
+    lb.TextColor3 = Color3.new(1, 1, 1)
     lb.TextStrokeTransparency = 0.2
     lb.Font = Enum.Font.Gotham
     lb.TextScaled = true
@@ -87,7 +118,7 @@ local function getRandomPet(eggName)
     for _, p in ipairs(pool) do
       cum += p.chance
       if r <= cum then
-        return p.name.." ("..string.format("%.2f", p.chance).."%)"
+        return p.name .. " (" .. string.format("%.2f", p.chance) .. "%)"
       end
     end
   end
@@ -103,126 +134,115 @@ local function randomizeEggs()
     end
   end
 end
--- Pet Spawner GUI (Part 3)
 
+-- GUI
 local gui = Instance.new("ScreenGui", PlayerGui)
-gui.Name = "PetPredictorGUI"
+gui.Name = "KuniHub"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 320, 0, 300)
 frame.Position = UDim2.new(0.02, 0, 0.3, 0)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-frame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
 frame.BorderSizePixel = 2
 frame.Active = true
 frame.Draggable = true
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Text = "Pet Predictor + Spawner"
-title.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-title.TextColor3 = Color3.new(1,1,1)
+title.Size = UDim2.new(1, -10, 0, 30)
+title.Position = UDim2.new(0, 5, 0, 5)
+title.Text = "Kuni Hub"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 16
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(0, 200, 255)
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local dropdown = Instance.new("TextButton", frame)
+dropdown.Size = UDim2.new(0.9, 0, 0, 30)
+dropdown.Position = UDim2.new(0.05, 0, 0, 40)
+dropdown.Text = "Select Pet"
+dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+dropdown.TextColor3 = Color3.new(1, 1, 1)
+dropdown.Font = Enum.Font.Gotham
+dropdown.TextSize = 16
+
+local petInput = Instance.new("TextBox", frame)
+petInput.Size = UDim2.new(0.9, 0, 0, 30)
+petInput.Position = UDim2.new(0.05, 0, 0, 80)
+petInput.PlaceholderText = "Weight (kg)"
+petInput.TextColor3 = Color3.new(1,1,1)
+petInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+petInput.Font = Enum.Font.Gotham
+petInput.TextSize = 16
+
+local ageInput = Instance.new("TextBox", frame)
+ageInput.Size = UDim2.new(0.9, 0, 0, 30)
+ageInput.Position = UDim2.new(0.05, 0, 0, 120)
+ageInput.PlaceholderText = "Age"
+ageInput.TextColor3 = Color3.new(1,1,1)
+ageInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+ageInput.Font = Enum.Font.Gotham
+ageInput.TextSize = 16
+
+local spawnBtn = Instance.new("TextButton", frame)
+spawnBtn.Size = UDim2.new(0.9, 0, 0, 30)
+spawnBtn.Position = UDim2.new(0.05, 0, 0, 160)
+spawnBtn.Text = "Spawn Pet"
+spawnBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+spawnBtn.TextColor3 = Color3.new(1,1,1)
+spawnBtn.Font = Enum.Font.GothamBold
+spawnBtn.TextSize = 16
 
 local predictBtn = Instance.new("TextButton", frame)
 predictBtn.Size = UDim2.new(0.9, 0, 0, 30)
-predictBtn.Position = UDim2.new(0.05, 0, 0, 40)
-predictBtn.Text = "🎯 Predict Pets"
-predictBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+predictBtn.Position = UDim2.new(0.05, 0, 0, 200)
+predictBtn.Text = "Predict Pets"
+predictBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 predictBtn.TextColor3 = Color3.new(1,1,1)
 predictBtn.Font = Enum.Font.GothamBold
-predictBtn.TextSize = 14
-predictBtn.MouseButton1Click:Connect(function()
-  predictBtn.Text = "Predicting..."
-  randomizeEggs()
-  task.wait(1)
-  predictBtn.Text = "🎯 Predict Pets"
-end)
--- Dropdown + Visual Pet Spawner (Part 4)
+predictBtn.TextSize = 16
 
-local divinePets = {
-  "Queen Bee", "Mimic Octopus", "Dragonfly", "Raccoon", "T-Rex",
-  "Red Fox", "Fennec Fox", "Brontosaurus", "Hyacinth Macaw",
-  "Scarlet Macaw", "Silver Monkey"
-}
-
-local dropdown = Instance.new("Frame", frame)
-dropdown.Size = UDim2.new(0.9, 0, 0, 30)
-dropdown.Position = UDim2.new(0.05, 0, 0, 80)
-dropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-
-local selectedPet = Instance.new("TextButton", dropdown)
-selectedPet.Size = UDim2.new(1, 0, 1, 0)
-selectedPet.Text = "Select Divine Pet"
-selectedPet.TextScaled = true
-selectedPet.Font = Enum.Font.Gotham
-selectedPet.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
-selectedPet.TextColor3 = Color3.new(1, 1, 1)
-
-local listFrame = Instance.new("ScrollingFrame", dropdown)
-listFrame.Size = UDim2.new(1, 0, 5, 0)
-listFrame.Position = UDim2.new(0, 0, 1, 0)
-listFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-listFrame.Visible = false
-listFrame.CanvasSize = UDim2.new(0, 0, 0, #divinePets * 30)
-listFrame.ScrollBarThickness = 4
-
-for _, pet in ipairs(divinePets) do
-  local btn = Instance.new("TextButton", listFrame)
-  btn.Size = UDim2.new(1, 0, 0, 30)
-  btn.Text = pet
-  btn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-  btn.TextColor3 = Color3.new(1, 1, 1)
-  btn.Font = Enum.Font.Gotham
-  btn.TextScaled = true
-  btn.MouseButton1Click:Connect(function()
-    selectedPet.Text = pet
-    listFrame.Visible = false
-  end)
-end
-
-selectedPet.MouseButton1Click:Connect(function()
-  listFrame.Visible = not listFrame.Visible
+-- Dropdown Logic
+local petName = ""
+dropdown.MouseButton1Click:Connect(function()
+  local list = "Choose Divine Pet:\n"
+  for _, pet in ipairs(divinePets) do list = list .. "- " .. pet .. "\n" end
+  dropdown.Text = "See console"
+  print(list)
 end)
 
-local function spawnPetVisual(petName)
-  local model = Instance.new("Model", workspace)
-  model.Name = petName.." [Visual]"
+-- Spawn Pet Visual
+spawnBtn.MouseButton1Click:Connect(function()
+  local chosen = dropdown.Text
+  if chosen == "Select Pet" or chosen == "See console" then return end
 
-  local body = Instance.new("Part", model)
-  body.Size = Vector3.new(3, 3, 3)
-  body.Anchored = true
-  body.Position = Character.HumanoidRootPart.Position + Vector3.new(0, 2, -5)
-  body.BrickColor = BrickColor.Random()
+  local model = Instance.new("Part", workspace)
+  model.Name = chosen
+  model.Size = Vector3.new(3,3,3)
+  model.Anchored = true
+  model.Position = Character.HumanoidRootPart.Position + Vector3.new(0,2,-5)
+  model.BrickColor = BrickColor.Random()
 
-  local tag = Instance.new("BillboardGui", body)
-  tag.Size = UDim2.new(0, 200, 0, 40)
+  local tag = Instance.new("BillboardGui", model)
+  tag.Size = UDim2.new(0, 150, 0, 60)
   tag.StudsOffset = Vector3.new(0, 3, 0)
   tag.AlwaysOnTop = true
 
   local label = Instance.new("TextLabel", tag)
   label.Size = UDim2.new(1, 0, 1, 0)
-  label.BackgroundTransparency = 1
-  label.Text = petName.." [Held]"
-  label.TextColor3 = Color3.new(1, 1, 1)
   label.TextScaled = true
-  label.Font = Enum.Font.GothamBold
-  label.TextStrokeTransparency = 0.2
-end
+  label.BackgroundTransparency = 1
+  label.Text = chosen .. " | " .. petInput.Text.."kg | Age: "..ageInput.Text
+  label.TextColor3 = Color3.new(1, 1, 1)
+  label.Font = Enum.Font.Gotham
+end)
 
-local spawnBtn = Instance.new("TextButton", frame)
-spawnBtn.Size = UDim2.new(0.9, 0, 0, 30)
-spawnBtn.Position = UDim2.new(0.05, 0, 0, 120)
-spawnBtn.Text = "🐾 Spawn Pet"
-spawnBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
-spawnBtn.TextColor3 = Color3.new(1, 1, 1)
-spawnBtn.Font = Enum.Font.GothamBold
-spawnBtn.TextSize = 14
-spawnBtn.MouseButton1Click:Connect(function()
-  local pet = selectedPet.Text
-  if pet and pet ~= "Select Divine Pet" then
-    spawnPetVisual(pet)
-  end
+-- Predict Button Logic
+predictBtn.MouseButton1Click:Connect(function()
+  predictBtn.Text = "Predicting..."
+  randomizeEggs()
+  wait(1.5)
+  predictBtn.Text = "Predict Pets"
 end)
