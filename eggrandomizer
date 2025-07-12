@@ -1,4 +1,4 @@
--- Pet Predictor by Kuni | Grow A Garden - Fully Upgraded with Kuni Hub Loading Screen + Percent
+vg-- Pet Predictor by Kuni | Grow A Garden - Fully Upgraded with Kuni Hub Loading Screen + Percent
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
