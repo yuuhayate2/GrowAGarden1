@@ -1,4 +1,4 @@
--- Kuni Hub Full GUI Script (Mobile-Compatible Only)
+-- Kuni Hub | Smooth Pet Predictor GUI Only
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -125,153 +125,107 @@ local function randomizeEggs()
   end
 end
 
-local loadingGui = Instance.new("ScreenGui", PlayerGui)
-loadingGui.Name = "KuniHub_Loading"
-loadingGui.ResetOnSpawn = false
-
-local bg = Instance.new("Frame", loadingGui)
-bg.Size = UDim2.new(0, 300, 0, 150)
-bg.Position = UDim2.new(0.5, -150, 0.5, -75)
-bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bg.BorderSizePixel = 0
-
-local title = Instance.new("TextLabel", bg)
-title.Size = UDim2.new(1, 0, 0.2, 0)
-title.Position = UDim2.new(0, 0, 0, 5)
-title.Text = "Kuni Hub"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.BackgroundTransparency = 1
-
-local loadingText = Instance.new("TextLabel", bg)
-loadingText.Size = UDim2.new(1, 0, 0.2, 0)
-loadingText.Position = UDim2.new(0, 0, 0.25, 0)
-loadingText.Text = "Loading Egg Predictor"
-loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-loadingText.Font = Enum.Font.GothamBold
-loadingText.TextSize = 18
-loadingText.BackgroundTransparency = 1
-
-local progressBar = Instance.new("Frame", bg)
-progressBar.Size = UDim2.new(0, 0, 0.15, 0)
-progressBar.Position = UDim2.new(0.05, 0, 0.65, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-
-local progressBg = Instance.new("Frame", bg)
-progressBg.Size = UDim2.new(0.9, 0, 0.15, 0)
-progressBg.Position = UDim2.new(0.05, 0, 0.65, 0)
-progressBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-progressBg.ZIndex = -1
-
-local percent = Instance.new("TextLabel", bg)
-percent.Size = UDim2.new(1, 0, 0.2, 0)
-percent.Position = UDim2.new(0, 0, 0.83, 0)
-percent.Text = "0%"
-percent.TextColor3 = Color3.fromRGB(255, 255, 255)
-percent.Font = Enum.Font.GothamBold
-percent.TextSize = 16
-percent.BackgroundTransparency = 1
-
-local function animateLoading()
-  for i = 1, 100 do
-    progressBar.Size = UDim2.new(i/100 * 0.9, 0, 0.15, 0)
-    percent.Text = tostring(i).."%"
-    RunService.RenderStepped:Wait()
-    task.wait(0.1)
-  end
-end
-
-coroutine.wrap(animateLoading)()
-task.wait(10)
-loadingGui:Destroy()
-
 local gui = Instance.new("ScreenGui", PlayerGui)
-gui.Name = "KuniHub_UI"
-gui.ResetOnSpawn = false
-
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 260, 0, 160)
+frame.Size = UDim2.new(0, 260, 0, 140)
 frame.Position = UDim2.new(0.01, 0, 0.3, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-frame.BorderSizePixel = 2
+frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
-local titleLabel = Instance.new("TextLabel", frame)
-titleLabel.Size = UDim2.new(1, -60, 0.25, 0)
-titleLabel.Position = UDim2.new(0, 5, 0, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Pet Predictor by Kuni"
-titleLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 20
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local exitBtn = Instance.new("TextButton", frame)
-exitBtn.Size = UDim2.new(0, 20, 0, 20)
-exitBtn.Position = UDim2.new(1, -22, 0, 2)
-exitBtn.Text = "X"
-exitBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
-exitBtn.TextColor3 = Color3.new(1,1,1)
-
-local minBtn = Instance.new("TextButton", frame)
-minBtn.Size = UDim2.new(0, 20, 0, 20)
-minBtn.Position = UDim2.new(1, -44, 0, 2)
-minBtn.Text = "-"
-minBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-minBtn.TextColor3 = Color3.new(1,1,1)
-
-local minimizedIcon = Instance.new("TextButton", gui)
-minimizedIcon.Size = UDim2.new(0, 120, 0, 30)
-minimizedIcon.Position = UDim2.new(0, 10, 1, -40)
-minimizedIcon.Text = "K"
-minimizedIcon.Visible = false
-minimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-minimizedIcon.TextColor3 = Color3.new(1, 1, 1)
-minimizedIcon.TextScaled = true
-
-local function animateK()
-  local h = 0
-  while minimizedIcon.Visible do
-    minimizedIcon.TextColor3 = Color3.fromHSV(h, 1, 1)
-    h = (h + 0.01) % 1
-    RunService.RenderStepped:Wait()
-  end
-end
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0.25, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Kuni Hub - Pet Predictor"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
 
 local predictBtn = Instance.new("TextButton", frame)
-predictBtn.Size = UDim2.new(0.9, 0, 0.3, 0)
-predictBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
+predictBtn.Size = UDim2.new(0.9, 0, 0.35, 0)
+predictBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
 predictBtn.Text = "Predict Pets"
-predictBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+predictBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 predictBtn.TextColor3 = Color3.new(1, 1, 1)
 predictBtn.Font = Enum.Font.GothamBold
 predictBtn.TextSize = 18
+predictBtn.AutoButtonColor = false
 
 local debounce = false
 predictBtn.MouseButton1Click:Connect(function()
   if debounce then return end
   debounce = true
-  predictBtn.Text = "Please wait..."
+  predictBtn.Text = "Predicting..."
+  TweenService:Create(predictBtn, TweenInfo.new(0.5), {BackgroundColor3 = Color3.fromRGB(0, 120, 200)}):Play()
   randomizeEggs()
   task.wait(2)
+  TweenService:Create(predictBtn, TweenInfo.new(0.5), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
   predictBtn.Text = "Predict Pets"
   debounce = false
 end)
 
-minBtn.MouseButton1Click:Connect(function()
-  frame.Visible = false
-  minimizedIcon.Visible = true
-  coroutine.wrap(animateK)()
+local loadingScreen = Instance.new("ScreenGui", PlayerGui)
+local lf = Instance.new("Frame", loadingScreen)
+lf.Size = UDim2.new(0, 400, 0, 200)
+lf.Position = UDim2.new(0.5, -200, 0.5, -100)
+lf.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+
+local titleText = Instance.new("TextLabel", lf)
+titleText.Size = UDim2.new(1, 0, 0.3, 0)
+titleText.Position = UDim2.new(0, 0, 0.1, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "Kuni Hub"
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 32
+titleText.TextColor3 = Color3.new(1, 1, 1)
+
+titleText2 = Instance.new("TextLabel", lf)
+titleText2.Size = UDim2.new(1, 0, 0.2, 0)
+titleText2.Position = UDim2.new(0, 0, 0.4, 0)
+titleText2.BackgroundTransparency = 1
+titleText2.Text = "Loading Egg Predictor"
+titleText2.Font = Enum.Font.Gotham
+titleText2.TextSize = 24
+titleText2.TextColor3 = Color3.new(1, 1, 1)
+
+local bar = Instance.new("Frame", lf)
+bar.Size = UDim2.new(0.8, 0, 0.1, 0)
+bar.Position = UDim2.new(0.1, 0, 0.75, 0)
+bar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+
+local fill = Instance.new("Frame", bar)
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+local percent = Instance.new("TextLabel", lf)
+percent.Size = UDim2.new(1, 0, 0.1, 0)
+percent.Position = UDim2.new(0, 0, 0.87, 0)
+percent.BackgroundTransparency = 1
+percent.TextColor3 = Color3.new(1, 1, 1)
+percent.Text = "0%"
+percent.Font = Enum.Font.GothamBold
+percent.TextSize = 20
+
+spawn(function()
+  local duration = 10
+  local start = tick()
+  while tick() - start < duration do
+    local progress = (tick() - start) / duration
+    fill.Size = UDim2.new(progress, 0, 1, 0)
+    percent.Text = tostring(math.floor(progress * 100)).."%"
+    RunService.RenderStepped:Wait()
+  end
+  fill.Size = UDim2.new(1, 0, 1, 0)
+  percent.Text = "100%"
+  task.wait(0.5)
+  TweenService:Create(loadingScreen, TweenInfo.new(1), {ResetOnSpawn = false}):Play()
+  loadingScreen:Destroy()
 end)
 
-minimizedIcon.MouseButton1Click:Connect(function()
+frame.Visible = false
+task.delay(10.5, function()
+  TweenService:Create(frame, TweenInfo.new(0.5), {Position = UDim2.new(0.01, 0, 0.3, 0)}):Play()
   frame.Visible = true
-  minimizedIcon.Visible = false
-end)
-
-exitBtn.MouseButton1Click:Connect(function()
-  gui:Destroy()
-  clearESP()
 end)
