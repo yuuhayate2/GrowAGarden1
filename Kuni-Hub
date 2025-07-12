@@ -1,65 +1,179 @@
--- Kuni Hub | Pet Spawner (Cartoon Blue Theme) -- Visual-only with custom models, cartoon-blue UI, particles, movement, and sounds
+-- Kuni Hub | Grow a Garden-Style Pet Spawner
+-- Fully Visual, Client-side, with Inventory, KG, Age, Movement
 
-local Players = game:GetService("Players") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService") local player = Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait()
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
-local PetModels = { ["Raccoon"] = "rbxassetid://18534285876", ["Mimic Octopus"] = "rbxassetid://18534293551", ["Butterfly"] = "rbxassetid://18534294465", ["Disco Bee"] = "rbxassetid://18534296182", ["Queen Bee"] = "rbxassetid://18534297609", ["Dragonfly"] = "rbxassetid://18534299344", ["Fennec Fox"] = "rbxassetid://18534300813", ["Red Fox"] = "rbxassetid://18534302538", ["T-Rex"] = "rbxassetid://18534303852", }
+local PetModels = {
+    ["Raccoon"] = "rbxassetid://18534285876",
+    ["Mimic Octopus"] = "rbxassetid://18534293551",
+    ["Butterfly"] = "rbxassetid://18534294465",
+    ["Disco Bee"] = "rbxassetid://18534296182",
+    ["Queen Bee"] = "rbxassetid://18534297609",
+    ["Dragonfly"] = "rbxassetid://18534299344",
+    ["Fennec Fox"] = "rbxassetid://18534300813",
+    ["Red Fox"] = "rbxassetid://18534302538",
+    ["T-Rex"] = "rbxassetid://18534303852",
+}
 
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui")) gui.Name = "KuniSpawner"
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "KuniPetSpawner"
 
-local frame = Instance.new("Frame", gui) frame.Size = UDim2.new(0, 320, 0, 200) frame.Position = UDim2.new(0.05, 0, 0.4, 0) frame.BackgroundColor3 = Color3.fromRGB(41, 128, 255) frame.BorderSizePixel = 0 frame.Active = true frame.Draggable = true Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 380, 0, 270)
+frame.Position = UDim2.new(0.03, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
-local shadow = Instance.new("ImageLabel", frame) shadow.BackgroundTransparency = 1 shadow.Image = "rbxassetid://1316045217" shadow.ScaleType = Enum.ScaleType.Slice shadow.SliceCenter = Rect.new(10, 10, 118, 118) shadow.Size = UDim2.new(1, 20, 1, 20) shadow.Position = UDim2.new(0, -10, 0, -10) shadow.ImageColor3 = Color3.new(0, 0, 0) shadow.ImageTransparency = 0.6
+local title = Instance.new("TextLabel", frame)
+title.Text = "Kuni Hub - Pet Spawner"
+title.Size = UDim2.new(1, 0, 0, 36)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
 
-local title = Instance.new("TextLabel", frame) title.Text = "Pet Spawner by Kuni" title.Size = UDim2.new(1, 0, 0, 40) title.TextColor3 = Color3.fromRGB(255, 255, 255) title.BackgroundTransparency = 1 title.Font = Enum.Font.FredokaOne title.TextSize = 24
+local dropdown = Instance.new("TextButton", frame)
+dropdown.Size = UDim2.new(1, -20, 0, 35)
+dropdown.Position = UDim2.new(0, 10, 0, 40)
+dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+dropdown.TextColor3 = Color3.new(1, 1, 1)
+dropdown.Font = Enum.Font.Gotham
+dropdown.TextSize = 18
+dropdown.Text = "Select Pet"
+Instance.new("UICorner", dropdown).CornerRadius = UDim.new(0, 6)
 
-local input = Instance.new("TextBox", frame) input.PlaceholderText = "Enter pet name (e.g. Raccoon)" input.Size = UDim2.new(1, -20, 0, 35) input.Position = UDim2.new(0, 10, 0, 50) input.Font = Enum.Font.FredokaOne input.TextColor3 = Color3.new(1, 1, 1) input.BackgroundColor3 = Color3.fromRGB(230, 240, 255) input.TextSize = 18 input.ClearTextOnFocus = false Instance.new("UICorner", input).CornerRadius = UDim.new(0, 6)
+local listFrame = Instance.new("ScrollingFrame", frame)
+listFrame.Position = UDim2.new(0, 10, 0, 80)
+listFrame.Size = UDim2.new(1, -20, 0, 80)
+listFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+listFrame.Visible = false
+listFrame.ScrollBarThickness = 4
+Instance.new("UICorner", listFrame).CornerRadius = UDim.new(0, 6)
 
-local button = Instance.new("TextButton", frame) button.Text = "Spawn Pet" button.Size = UDim2.new(1, -20, 0, 40) button.Position = UDim2.new(0, 10, 0, 100) button.BackgroundColor3 = Color3.fromRGB(0, 102, 204) button.Font = Enum.Font.FredokaOne button.TextColor3 = Color3.new(1, 1, 1) button.TextSize = 20 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
-
-local function createEffect(part, flying) local effect = Instance.new("ParticleEmitter") effect.Texture = "rbxassetid://48384130" effect.Size = NumberSequence.new(0.3) effect.Rate = 15 effect.Speed = NumberRange.new(0.5) effect.LightEmission = 0.7 effect.Parent = part
-
-if flying then
-    local float = 0
-    RunService.RenderStepped:Connect(function()
-        if part and part:IsDescendantOf(workspace) then
-            float += 0.05
-            part.Position = part.Position + Vector3.new(0, math.sin(float)*0.05, 0)
-        end
-    end)
+local selectedPet = nil
+for name, _ in pairs(PetModels) do
+	local item = Instance.new("TextButton", listFrame)
+	item.Size = UDim2.new(1, -10, 0, 30)
+	item.Position = UDim2.new(0, 5, 0, (#listFrame:GetChildren() - 1) * 30)
+	item.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	item.TextColor3 = Color3.new(1, 1, 1)
+	item.Font = Enum.Font.Gotham
+	item.TextSize = 18
+	item.Text = name
+	item.MouseButton1Click:Connect(function()
+		dropdown.Text = name
+		selectedPet = name
+		listFrame.Visible = false
+	end)
 end
 
+dropdown.MouseButton1Click:Connect(function()
+	listFrame.Visible = not listFrame.Visible
+end)
+
+-- Inventory UI
+local inventory = Instance.new("Frame", gui)
+inventory.Size = UDim2.new(0, 300, 0, 180)
+inventory.Position = UDim2.new(0.75, 0, 0.3, 0)
+inventory.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", inventory).CornerRadius = UDim.new(0, 10)
+
+local invLabel = Instance.new("TextLabel", inventory)
+invLabel.Size = UDim2.new(1, 0, 0, 25)
+invLabel.Text = "Pet Inventory"
+invLabel.TextColor3 = Color3.new(1, 1, 1)
+invLabel.Font = Enum.Font.GothamBold
+invLabel.TextSize = 18
+invLabel.BackgroundTransparency = 1
+
+-- Spawn Button
+local button = Instance.new("TextButton", frame)
+button.Text = "Spawn Pet"
+button.Size = UDim2.new(1, -20, 0, 35)
+button.Position = UDim2.new(0, 10, 0, 170)
+button.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+button.Font = Enum.Font.GothamBold
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextSize = 20
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+-- Pet Display + Movement
+local function createBillboard(model, weight, age)
+	local gui = Instance.new("BillboardGui", model)
+	gui.Size = UDim2.new(0, 120, 0, 50)
+	gui.AlwaysOnTop = true
+	gui.StudsOffset = Vector3.new(0, 3, 0)
+	local label = Instance.new("TextLabel", gui)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamSemibold
+	label.TextSize = 14
+	label.Text = model.Name .. "\nWeight: " .. weight .. " KG\nAge: " .. age
 end
 
-local function spawnPet(petName) local assetId = PetModels[petName] if not assetId then warn("Invalid pet name") return end
-
-local model = game:GetObjects(assetId)[1]
-if not model then warn("Model failed to load") return end
-
-model.Name = petName
-model.Parent = workspace
-model.PrimaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-
-local root = character.PrimaryPart.Position + Vector3.new(0, 2, 0)
-model:SetPrimaryPartCFrame(CFrame.new(root))
-
-local isFlying = (petName:lower():find("bee") or petName == "Butterfly" or petName == "Dragonfly")
-createEffect(model.PrimaryPart, isFlying)
-
-local sound = Instance.new("Sound", model.PrimaryPart)
-sound.SoundId = isFlying and "rbxassetid://9118823103" or "rbxassetid://9118827881"
-sound.Looped = true
-sound.Volume = 0.4
-sound:Play()
-
-coroutine.wrap(function()
-    while model and model.Parent do
-        local target = root + Vector3.new(math.random(-15,15), 0, math.random(-15,15))
-        TweenService:Create(model.PrimaryPart, TweenInfo.new(2), {CFrame = CFrame.new(target)}):Play()
-        wait(2.2)
-    end
-end)()
-
+local function animate(model, isFlying, spawnPos)
+	coroutine.wrap(function()
+		while model and model.Parent do
+			local offset = Vector3.new(math.random(-30, 30), isFlying and math.random(2, 4) or 0, math.random(-30, 30))
+			local target = spawnPos + offset
+			TweenService:Create(model.PrimaryPart, TweenInfo.new(3), { CFrame = CFrame.new(target) }):Play()
+			wait(3.2)
+		end
+	end)()
 end
 
-button.MouseButton1Click:Connect(function() local name = input.Text spawnPet(name) end)
+local function attachToHand(model)
+	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
+	if hand then
+		model:SetPrimaryPartCFrame(hand.CFrame * CFrame.new(0, 0, -1))
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = model.PrimaryPart
+		weld.Part1 = hand
+		weld.Parent = model.PrimaryPart
+	end
+end
 
+local function spawnPet(name)
+	local assetId = PetModels[name]
+	if not assetId then return end
+
+	local model = game:GetObjects(assetId)[1]
+	model.Name = name
+	model.Parent = workspace
+	model.PrimaryPart = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+	local spawnPos = character.PrimaryPart.Position + Vector3.new(0, 2, 0)
+	model:SetPrimaryPartCFrame(CFrame.new(spawnPos))
+
+	local weight = math.random(1, 100)
+	local age = math.random(1, 100)
+	createBillboard(model, weight, age)
+	attachToHand(model)
+
+	local btn = Instance.new("TextButton", inventory)
+	btn.Size = UDim2.new(1, -10, 0, 30)
+	btn.Position = UDim2.new(0, 5, 0, (#inventory:GetChildren() - 1) * 30 + 25)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.Text = name .. " (" .. weight .. "kg / Age: " .. age .. ")"
+	btn.MouseButton1Click:Connect(function()
+		model:SetPrimaryPartCFrame(character.PrimaryPart.CFrame * CFrame.new(0, 0, -3))
+	end)
+
+	local flying = name:lower():find("bee") or name:lower():find("fly") or name == "Butterfly"
+	animate(model, flying, spawnPos)
+end
+
+button.MouseButton1Click:Connect(function()
+	if selectedPet then
+		spawnPet(selectedPet)
+	end
+end)
