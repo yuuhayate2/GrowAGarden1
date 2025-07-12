@@ -1,3 +1,5 @@
+-- Pet Predictor by Kuni with Loading Screen
+
 local Players = game:GetService("Players")
 local CollectionService = game:GetService("CollectionService")
 local TweenService = game:GetService("TweenService")
@@ -47,3 +49,7 @@ TweenService:Create(progressBar, TweenInfo.new(10, Enum.EasingStyle.Linear), {
 -- WAIT THEN LOAD ACTUAL SCRIPT
 task.delay(10, function()
     loadingGui:Destroy()
+
+    -- Paste the full GUI and ESP script here
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Devluatech/Egg-Predictor-By-Kuny/main/eggpredictor.lua"))()
+end)
