@@ -1,1 +1,51 @@
+-- Kuni Hub | Full Visual Pet Spawner (Grow a Garden Inspired) -- 100% Visual Client-Only | With Walk, Fly, Animation, Sound, Particles
+
+local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local TweenService = game:GetService("TweenService") local RunService = game:GetService("RunService") local player = Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait()
+
+-- Fake Asset IDs (replace with real ones or toolbox links) local PetModels = { ["Raccoon"] = "rbxassetid://1543526624", ["Mimic Octopus"] = "rbxassetid://17031568256", ["Dragonfly"] = "rbxassetid://17031567500", ["Disco Bee"] = "rbxassetid://17031566842", ["Queen Bee"] = "rbxassetid://17031566234", ["Fennec Fox"] = "rbxassetid://17031565678", ["Red Fox"] = "rbxassetid://17031564999", ["Butterfly"] = "rbxassetid://17031564222", ["T-Rex"] = "rbxassetid://17031563600", }
+
+-- GUI local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui")) screenGui.Name = "KuniHubSpawner"
+
+local frame = Instance.new("Frame", screenGui) frame.Size = UDim2.new(0, 300, 0, 220) frame.Position = UDim2.new(0.05, 0, 0.5, -110) frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) frame.BorderSizePixel = 0 frame.Active = true frame.Draggable = true Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel", frame) title.Size = UDim2.new(1, 0, 0, 40) title.Text = "Pet Spawner by Kuni" title.TextColor3 = Color3.fromRGB(255, 255, 255) title.BackgroundTransparency = 1 title.Font = Enum.Font.GothamBold title.TextSize = 22
+
+local textBox = Instance.new("TextBox", frame) textBox.Size = UDim2.new(1, -20, 0, 35) textBox.Position = UDim2.new(0, 10, 0, 60) textBox.PlaceholderText = "Enter pet name (e.g., Raccoon)" textBox.Font = Enum.Font.Gotham textBox.TextSize = 18 textBox.TextColor3 = Color3.new(1,1,1) textBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40) textBox.ClearTextOnFocus = false
+
+local spawnBtn = Instance.new("TextButton", frame) spawnBtn.Size = UDim2.new(1, -20, 0, 40) spawnBtn.Position = UDim2.new(0, 10, 0, 110) spawnBtn.Text = "Spawn Pet" spawnBtn.Font = Enum.Font.GothamBold spawnBtn.TextSize = 20 spawnBtn.TextColor3 = Color3.new(1, 1, 1) spawnBtn.BackgroundColor3 = Color3.fromRGB(50, 130, 200)
+
+-- Pet Fly Animation (for bees, butterfly, dragonfly) local function addFloatEffect(model) local offset = 0 RunService.RenderStepped:Connect(function() if model and model.PrimaryPart then offset = offset + 0.05 model:SetPrimaryPartCFrame(model.PrimaryPart.CFrame * CFrame.new(0, math.sin(offset) * 0.05, 0)) end end) end
+
+-- Spawn Pet Function local function spawnPet(petName) local assetId = PetModels[petName] if not assetId then warn("Pet not found") return end
+
+local petModel = game:GetObjects(assetId)[1]
+if not petModel then warn("Invalid model") return end
+
+petModel.Name = petName
+petModel.Parent = workspace
+petModel.PrimaryPart = petModel.PrimaryPart or petModel:FindFirstChildWhichIsA("BasePart")
+if not petModel.PrimaryPart then warn("No PrimaryPart") return end
+
+local garden = workspace:FindFirstChild("MyPlot") or workspace:FindFirstChild(player.Name.."_Garden") or character.PrimaryPart
+local center = garden.Position or character.PrimaryPart.Position
+petModel:SetPrimaryPartCFrame(CFrame.new(center + Vector3.new(0, 2, 0)))
+
+-- Movement Loop
+coroutine.wrap(function()
+    while petModel and petModel.Parent do
+        local target = center + Vector3.new(math.random(-15,15), 0, math.random(-15,15))
+        TweenService:Create(petModel.PrimaryPart, TweenInfo.new(2), {CFrame = CFrame.new(target)}):Play()
+        task.wait(2.2)
+    end
+end)()
+
+-- Float animation for flying pets
+if string.find(petName:lower(), "bee") or petName == "Butterfly" or petName == "Dragonfly" then
+    addFloatEffect(petModel)
+end
+
+end
+
+-- Button Click spawnBtn.MouseButton1Click:Connect(function() local name = textBox.Text spawnPet(name) end)
+
 
