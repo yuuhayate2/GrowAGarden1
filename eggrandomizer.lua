@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local eggToPets = {
@@ -104,6 +103,7 @@ lText.BackgroundTransparency = 1
 lText.Font = Enum.Font.GothamBold
 lText.TextSize = 20
 lText.TextColor3 = Color3.new(1, 1, 1)
+lText.Text = "Loading Egg Predictor..."
 
 local progressBar = Instance.new("Frame", lFrame)
 progressBar.Size = UDim2.new(0.8, 0, 0.1, 0)
@@ -115,23 +115,11 @@ fill.Size = UDim2.new(0, 0, 1, 0)
 fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 
 spawn(function()
-  local percent = 0
-  local dot = ""
-  while percent <= 100 do
-    lText.Text = "Loading Egg Predictor"..dot.." "..percent.."%"
-    dot = (dot == "...") and "" or dot.."."
-    fill.Size = UDim2.new(percent/100, 0, 1, 0)
-    percent += 1
-    wait(0.05)
+  for i = 0, 100, 1 do
+    fill.Size = UDim2.new(i/100, 0, 1, 0)
+    wait(0.025)
   end
-  wait(0.5)
-  TweenService:Create(lFrame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-  for _, c in pairs(lFrame:GetChildren()) do
-    if c:IsA("TextLabel") or c:IsA("Frame") then
-      TweenService:Create(c, TweenInfo.new(1), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
-    end
-  end
-  wait(1)
+  wait(0.3)
   loadingGui:Destroy()
 
   local gui = Instance.new("ScreenGui", PlayerGui)
@@ -155,40 +143,6 @@ spawn(function()
   title.Font = Enum.Font.GothamBold
   title.TextSize = 18
   title.TextXAlignment = Enum.TextXAlignment.Left
-
-  local exitBtn = Instance.new("TextButton", frame)
-  exitBtn.Size = UDim2.new(0, 20, 0, 20)
-  exitBtn.Position = UDim2.new(1, -22, 0, 5)
-  exitBtn.Text = "X"
-  exitBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
-  exitBtn.TextColor3 = Color3.new(1,1,1)
-
-  local minBtn = Instance.new("TextButton", frame)
-  minBtn.Size = UDim2.new(0, 20, 0, 20)
-  minBtn.Position = UDim2.new(1, -44, 0, 5)
-  minBtn.Text = "-"
-  minBtn.BackgroundColor3 = Color3.fromRGB(90, 90, 100)
-  minBtn.TextColor3 = Color3.new(1,1,1)
-
-  local minimizedIcon = Instance.new("TextButton", gui)
-  minimizedIcon.Size = UDim2.new(0, 50, 0, 50)
-  minimizedIcon.Position = UDim2.new(0, 10, 1, -60)
-  minimizedIcon.Text = "K"
-  minimizedIcon.Visible = false
-  minimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-  minimizedIcon.TextColor3 = Color3.new(1,1,1)
-  minimizedIcon.Font = Enum.Font.Arcade
-  minimizedIcon.TextScaled = true
-  minimizedIcon.Draggable = true
-
-  spawn(function()
-    local h = 0
-    while minimizedIcon.Parent do
-      minimizedIcon.TextColor3 = Color3.fromHSV(h, 1, 1)
-      h = (h + 0.01) % 1
-      RunService.RenderStepped:Wait()
-    end
-  end)
 
   local predictBtn = Instance.new("TextButton", frame)
   predictBtn.Size = UDim2.new(0.9, 0, 0, 40)
@@ -258,21 +212,5 @@ spawn(function()
 
   infoBtn.MouseButton1Click:Connect(function()
     eggGui.Enabled = not eggGui.Enabled
-  end)
-
-  minBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    minimizedIcon.Visible = true
-  end)
-
-  minimizedIcon.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    minimizedIcon.Visible = false
-  end)
-
-  exitBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-    eggGui:Destroy()
-    clearESP()
   end)
 end)
