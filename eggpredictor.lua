@@ -15,7 +15,7 @@ local loadingFrame = Instance.new("Frame")
 loadingFrame.Size = UDim2.new(0, 320, 0, 180)
 loadingFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 loadingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 loadingFrame.BorderSizePixel = 0
 loadingFrame.Parent = gui
 Instance.new("UICorner", loadingFrame).CornerRadius = UDim.new(0, 12)
@@ -26,7 +26,7 @@ title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Kuni Hub"
 title.Font = Enum.Font.GothamBlack
-title.TextColor3 = Color3.fromRGB(0, 255, 0)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextScaled = true
 title.Parent = loadingFrame
 
@@ -36,28 +36,27 @@ loadingLabel.Position = UDim2.new(0, 0, 0.4, 0)
 loadingLabel.BackgroundTransparency = 1
 loadingLabel.Text = "Loading Script"
 loadingLabel.Font = Enum.Font.Code
-loadingLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+loadingLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 loadingLabel.TextScaled = true
 loadingLabel.Parent = loadingFrame
 
 local progressBarBack = Instance.new("Frame")
 progressBarBack.Size = UDim2.new(0.9, 0, 0.08, 0)
 progressBarBack.Position = UDim2.new(0.05, 0, 0.8, 0)
-progressBarBack.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+progressBarBack.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 progressBarBack.BorderSizePixel = 0
 progressBarBack.Parent = loadingFrame
 Instance.new("UICorner", progressBarBack).CornerRadius = UDim.new(0, 6)
 
 local progressBarFill = Instance.new("Frame")
 progressBarFill.Size = UDim2.new(0, 0, 1, 0)
-progressBarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+progressBarFill.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
 progressBarFill.BorderSizePixel = 0
 progressBarFill.Parent = progressBarBack
 Instance.new("UICorner", progressBarFill).CornerRadius = UDim.new(0, 6)
 
 local dotCount = 0
 local percent = 0
-
 local loading = true
 
 spawn(function()
@@ -92,7 +91,7 @@ local mainGui = Instance.new("Frame")
 mainGui.Size = UDim2.new(0, 280, 0, 180)
 mainGui.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainGui.AnchorPoint = Vector2.new(0.5, 0.5)
-mainGui.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+mainGui.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
 mainGui.Parent = gui
 Instance.new("UICorner", mainGui).CornerRadius = UDim.new(0, 10)
 
@@ -102,14 +101,14 @@ titleLabel.Position = UDim2.new(0, 10, 0, 10)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Egg Predictor by Kuni"
 titleLabel.Font = Enum.Font.GothamSemibold
-titleLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextSize = 20
 titleLabel.Parent = mainGui
 
 local predictButton = Instance.new("TextButton")
 predictButton.Size = UDim2.new(0.9, 0, 0, 40)
 predictButton.Position = UDim2.new(0.05, 0, 0.45, 0)
-predictButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+predictButton.BackgroundColor3 = Color3.fromRGB(100, 180, 255)
 predictButton.Text = "Predict Pets"
 predictButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 predictButton.Font = Enum.Font.GothamBold
@@ -138,7 +137,7 @@ predictButton.MouseButton1Click:Connect(function()
 				label.Size = UDim2.new(1, 0, 1, 0)
 				label.BackgroundTransparency = 1
 				label.Text = "Possible Pet"
-				label.TextColor3 = Color3.fromRGB(0, 255, 0)
+				label.TextColor3 = Color3.fromRGB(255, 255, 255)
 				label.TextStrokeTransparency = 0.3
 				label.Font = Enum.Font.GothamBold
 				label.TextScaled = true
@@ -158,7 +157,7 @@ exitBtn.Text = "X"
 exitBtn.Font = Enum.Font.GothamBold
 exitBtn.TextSize = 16
 exitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-exitBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+exitBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
 exitBtn.Parent = mainGui
 Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
@@ -169,7 +168,7 @@ minimizeBtn.Text = "_"
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextSize = 18
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
 minimizeBtn.Parent = mainGui
 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
@@ -178,8 +177,8 @@ minimizedBtn.Size = UDim2.new(0, 100, 0, 30)
 minimizedBtn.Position = UDim2.new(0, 10, 1, -40)
 minimizedBtn.Text = "Kuni"
 minimizedBtn.Visible = false
-minimizedBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-minimizedBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+minimizedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minimizedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizedBtn.Font = Enum.Font.GothamBlack
 minimizedBtn.TextSize = 20
 minimizedBtn.Parent = gui
