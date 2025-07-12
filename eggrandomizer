@@ -91,12 +91,5 @@ spawn(function()
   startGUI()
 end)
 
--- 🧠 (rest of the script starts from startGUI below this comment)
 
--- Keep the full upgraded GUI below here...
-
-
-✅ Done! May percent label na ngayon sa loading screen (0% to 100%) habang napupuno ang progress bar. Pagdating ng 100%, auto-fade out and papasok na yung GUI.
-
-Subukan mo na i-run — kung gusto mo i-center yung percent o dagdagan ng bounce, sabihin mo lang! 🌈📊
 
