@@ -1,216 +1,152 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local eggToPets = {
-  ["Paradise Egg"] = {
-    {name="Ostrich", chance=40},
-    {name="Peacock", chance=30},
-    {name="Capybara", chance=21},
-    {name="Scarlet Macaw", chance=8},
-    {name="Mimic Octopus", chance=1},
-  },
-  ["Oasis Egg"] = {
-    {name="Meerkat", chance=45},
-    {name="Sand Snake", chance=34.5},
-    {name="Axolotl", chance=15},
-    {name="Hyacinth Macaw", chance=5},
-    {name="Fennec Fox", chance=0.5},
-  },
-  ["Dinosaur Egg"] = {
-    {name="Raptor", chance=35},
-    {name="Triceratops", chance=32.5},
-    {name="Stegosaurus", chance=29},
-    {name="Pterodactyl", chance=3},
-    {name="Brontosaurus", chance=1},
-    {name="T-Rex", chance=0.5},
-  },
+  ["Common Egg"]={{name="Golden Lab",chance=33.33},{name="Dog",chance=33.33},{name="Bunny",chance=33.34}},
+  ["Uncommon Egg"]={{name="Black Bunny",chance=25},{name="Chicken",chance=25},{name="Cat",chance=25},{name="Deer",chance=25}},
+  ["Rare Egg"]={{name="Orange Tabby",chance=33.33},{name="Spotted Deer",chance=25},{name="Pig",chance=16.67},{name="Rooster",chance=16.67},{name="Monkey",chance=8.33}},
+  ["Legendary Egg"]={{name="Cow",chance=42.55},{name="Silver Monkey",chance=42.55},{name="Sea Otter",chance=10.64},{name="Turtle",chance=2.13},{name="Polar Bear",chance=2.13}},
+  ["Mythical Egg"]={{name="Grey Mouse",chance=35.71},{name="Brown Mouse",chance=26.79},{name="Squirrel",chance=26.79},{name="Red Giant Ant",chance=8.93},{name="Red Fox",chance=1.79}},
+  ["Bug Egg"]={{name="Snail",chance=40},{name="Giant Ant",chance=30},{name="Caterpillar",chance=25},{name="Praying Mantis",chance=4},{name="Dragonfly",chance=1}},
+  ["Paradise Egg"]={{name="Ostrich",chance=40},{name="Peacock",chance=30},{name="Capybara",chance=21},{name="Scarlet Macaw",chance=8},{name="Mimic Octopus",chance=1}},
+  ["Oasis Egg"]={{name="Meerkat",chance=45},{name="Sand Snake",chance=34.5},{name="Axolotl",chance=15},{name="Hyacinth Macaw",chance=5},{name="Fennec Fox",chance=0.5}},
+  ["Dinosaur Egg"]={{name="Raptor",chance=35},{name="Triceratops",chance=32.5},{name="Stegosaurus",chance=29},{name="Pterodactyl",chance=3},{name="Brontosaurus",chance=1},{name="T-Rex",chance=0.5}},
 }
 
 local function clearESP()
-  for _, v in ipairs(workspace:GetDescendants()) do
-    if v:IsA("BillboardGui") and v.Name == "EggESP" then
-      v:Destroy()
-    end
+  for _,v in ipairs(workspace:GetDescendants()) do
+    if v:IsA("BillboardGui") and v.Name=="EggESP" then v:Destroy() end
   end
 end
 
-local function createESP(part, text)
-  local gui = Instance.new("BillboardGui", part)
-  gui.Name = "EggESP"
-  gui.Size = UDim2.new(0, 100, 0, 40)
-  gui.StudsOffset = Vector3.new(0, 2.5, 0)
-  gui.AlwaysOnTop = true
-  local label = Instance.new("TextLabel", gui)
-  label.Size = UDim2.new(1, 0, 1, 0)
-  label.BackgroundTransparency = 1
-  label.Text = text
-  label.TextColor3 = Color3.new(1, 1, 1)
-  label.TextStrokeTransparency = 0.2
-  label.Font = Enum.Font.Gotham
-  label.TextScaled = true
-end
-
-local function getRandomPet(eggName)
-  local pool = eggToPets[eggName]
-  if pool then
-    local total, cum = 0, 0
-    for _, p in ipairs(pool) do total += p.chance end
-    local r = math.random() * total
-    for _, p in ipairs(pool) do
-      cum += p.chance
-      if r <= cum then
-        return p.name.." ("..string.format("%.2f", p.chance).."%)"
-      end
-    end
+local function getRandomPet(e)
+  local p=eggToPets[e]
+  if p then
+    local tot=0 for _,x in ipairs(p) do tot+=x.chance end
+    local r=math.random()*tot
+    local sum=0
+    for _,x in ipairs(p) do sum+=x.chance if r<=sum then return x.name.." ("..string.format("%.2f",x.chance).."%)" end end
   end
   return "Unknown"
 end
 
 local function randomizeEggs()
   clearESP()
-  for _, obj in ipairs(workspace:GetDescendants()) do
-    if obj:IsA("Model") and eggToPets[obj.Name] then
-      local part = obj:FindFirstChildWhichIsA("BasePart")
-      if part then createESP(part, getRandomPet(obj.Name)) end
+  for _,m in ipairs(workspace:GetDescendants()) do
+    if m:IsA("Model") and eggToPets[m.Name] then
+      local b=m:FindFirstChildWhichIsA("BasePart")
+      if b then
+        local g=Instance.new("BillboardGui",b)
+        g.Name="EggESP";g.Size=UDim2.new(0,100,0,40);g.StudsOffset=Vector3.new(0,2.5,0);g.AlwaysOnTop=true
+        local l=Instance.new("TextLabel",g)
+        l.Size=UDim2.new(1,0,1,0);l.BackgroundTransparency=1
+        l.Text=getRandomPet(m.Name)
+        l.TextScaled=true;l.Font=Enum.Font.Gotham;l.TextColor3=Color3.new(1,1,1);l.TextStrokeTransparency=0.2
+      end
     end
   end
 end
 
-local loadingGui = Instance.new("ScreenGui", PlayerGui)
-loadingGui.Name = "KuniLoading"
-loadingGui.ResetOnSpawn = false
+local loadGui=Instance.new("ScreenGui",PlayerGui)
+local lf=Instance.new("Frame",loadGui)
+lf.Size=UDim2.new(0,360,0,160)
+lf.Position=UDim2.new(0.5,-180,0.5,-80)
+lf.BackgroundColor3=Color3.fromRGB(20,20,25)
 
-local lFrame = Instance.new("Frame", loadingGui)
-lFrame.Size = UDim2.new(0, 400, 0, 200)
-lFrame.Position = UDim2.new(0.5, -200, 0.5, -100)
-lFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-lFrame.BorderSizePixel = 0
+local lt=Instance.new("TextLabel",lf)
+lt.Size=UDim2.new(1,0,0.3,0);lt.Position=UDim2.new(0,0,0,5)
+lt.BackgroundTransparency=1;lt.Text="Kuni Hub";lt.Font=Enum.Font.GothamBlack;lt.TextSize=26;lt.TextColor3=Color3.new(1,1,1)
 
-local lTitle = Instance.new("TextLabel", lFrame)
-lTitle.Size = UDim2.new(1, 0, 0.25, 0)
-lTitle.Position = UDim2.new(0, 0, 0, 10)
-lTitle.BackgroundTransparency = 1
-lTitle.Text = "Kuni Hub"
-lTitle.Font = Enum.Font.GothamBlack
-lTitle.TextSize = 28
-lTitle.TextColor3 = Color3.new(1, 1, 1)
+local ld=Instance.new("TextLabel",lf)
+ld.Size=UDim2.new(1,0,0.3,0);ld.Position=UDim2.new(0,0,0.3,0)
+ld.BackgroundTransparency=1;ld.Font=Enum.Font.GothamBold;ld.TextSize=18;ld.TextColor3=Color3.new(1,1,1);ld.Text="Loading Egg Predictor..."
 
-local lText = Instance.new("TextLabel", lFrame)
-lText.Size = UDim2.new(1, 0, 0.25, 0)
-lText.Position = UDim2.new(0, 0, 0.3, 0)
-lText.BackgroundTransparency = 1
-lText.Font = Enum.Font.GothamBold
-lText.TextSize = 20
-lText.TextColor3 = Color3.new(1, 1, 1)
-lText.Text = "Loading Egg Predictor..."
+local pb=Instance.new("Frame",lf)
+pb.Size=UDim2.new(0.8,0,0.1,0);pb.Position=UDim2.new(0.1,0,0.6,0);pb.BackgroundColor3=Color3.fromRGB(60,60,70)
 
-local progressBar = Instance.new("Frame", lFrame)
-progressBar.Size = UDim2.new(0.8, 0, 0.1, 0)
-progressBar.Position = UDim2.new(0.1, 0, 0.7, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-
-local fill = Instance.new("Frame", progressBar)
-fill.Size = UDim2.new(0, 0, 1, 0)
-fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+local pf=Instance.new("Frame",pb)
+pf.Size=UDim2.new(0,0,1,0)
+pf.BackgroundColor3=Color3.fromRGB(0,170,255)
 
 spawn(function()
-  for i = 0, 100, 1 do
-    fill.Size = UDim2.new(i/100, 0, 1, 0)
-    wait(0.025)
+  for i=0,100,2 do
+    pf.Size=UDim2.new(i/100,0,1,0)
+    wait(0.02)
   end
   wait(0.3)
-  loadingGui:Destroy()
+  loadGui:Destroy()
 
-  local gui = Instance.new("ScreenGui", PlayerGui)
-  gui.Name = "KuniHub"
-  gui.ResetOnSpawn = false
+  local gui=Instance.new("ScreenGui",PlayerGui)
+  gui.Name="KuniHub";gui.ResetOnSpawn=false
 
-  local frame = Instance.new("Frame", gui)
-  frame.Size = UDim2.new(0, 280, 0, 180)
-  frame.Position = UDim2.new(0.01, 0, 0.3, 0)
-  frame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-  frame.BorderSizePixel = 0
-  frame.Active = true
-  frame.Draggable = true
+  local fr=Instance.new("Frame",gui)
+  fr.Size=UDim2.new(0,280,0,200);fr.Position=UDim2.new(0.02,0,0.3,0)
+  fr.BackgroundColor3=Color3.fromRGB(30,30,45);fr.Active=true;fr.Draggable=true
 
-  local title = Instance.new("TextLabel", frame)
-  title.Size = UDim2.new(1, -60, 0, 25)
-  title.Position = UDim2.new(0, 5, 0, 5)
-  title.BackgroundTransparency = 1
-  title.Text = "Pet Predictor by Kuni"
-  title.TextColor3 = Color3.fromRGB(0, 200, 255)
-  title.Font = Enum.Font.GothamBold
-  title.TextSize = 18
-  title.TextXAlignment = Enum.TextXAlignment.Left
+  local tt=Instance.new("TextLabel",fr)
+  tt.Size=UDim2.new(1,-60,0,30);tt.Position=UDim2.new(0,5,0,5)
+  tt.BackgroundTransparency=1;tt.Text="Pet Predictor by Kuni";tt.Font=Enum.Font.GothamBold;tt.TextSize=18;tt.TextColor3=Color3.fromRGB(0,200,255)
 
-  local predictBtn = Instance.new("TextButton", frame)
-  predictBtn.Size = UDim2.new(0.9, 0, 0, 40)
-  predictBtn.Position = UDim2.new(0.05, 0, 0, 50)
-  predictBtn.Text = "Predict Pets"
-  predictBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-  predictBtn.TextColor3 = Color3.new(1,1,1)
-  predictBtn.Font = Enum.Font.GothamBold
-  predictBtn.TextSize = 18
+  local xb=Instance.new("TextButton",fr)
+  xb.Size=UDim2.new(0,20,0,20);xb.Position=UDim2.new(1,-22,0,5);xb.Text="X"
+  xb.BackgroundColor3=Color3.fromRGB(200,30,30);xb.TextColor3=Color3.new(1,1,1)
 
-  local infoBtn = Instance.new("TextButton", frame)
-  infoBtn.Size = UDim2.new(0.9, 0, 0, 30)
-  infoBtn.Position = UDim2.new(0.05, 0, 0, 100)
-  infoBtn.Text = "Egg Info"
-  infoBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-  infoBtn.TextColor3 = Color3.new(0,0,0)
-  infoBtn.Font = Enum.Font.Gotham
-  infoBtn.TextSize = 16
+  local mb=Instance.new("TextButton",fr)
+  mb.Size=UDim2.new(0,20,0,20);mb.Position=UDim2.new(1,-44,0,5);mb.Text="-"
+  mb.BackgroundColor3=Color3.fromRGB(80,80,100);mb.TextColor3=Color3.new(1,1,1)
 
-  local eggGui = Instance.new("ScreenGui", PlayerGui)
-  eggGui.Name = "EggInfoUI"
-  eggGui.ResetOnSpawn = false
-  eggGui.Enabled = false
+  local pb1=Instance.new("TextButton",fr)
+  pb1.Size=UDim2.new(0.9,0,0,40);pb1.Position=UDim2.new(0.05,0,0,50)
+  pb1.Text="Predict Pets";pb1.Font=Enum.Font.GothamBold;pb1.TextSize=18
 
-  local eggFrame = Instance.new("ScrollingFrame", eggGui)
-  eggFrame.Size = UDim2.new(0, 250, 0, 280)
-  eggFrame.Position = UDim2.new(0.5, -125, 0.5, -140)
-  eggFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-  eggFrame.CanvasSize = UDim2.new(0, 0, 0, 800)
-  eggFrame.ScrollBarThickness = 6
-  eggFrame.Visible = true
+  local ib=Instance.new("TextButton",fr)
+  ib.Size=UDim2.new(0.9,0,0,30);ib.Position=UDim2.new(0.05,0,0,110)
+  ib.Text="Egg Info";ib.Font=Enum.Font.Gotham;ib.TextSize=16;ib.TextColor3=Color3.new(0,0,0)
 
-  local y = 10
-  for egg, pets in pairs(eggToPets) do
-    local title = Instance.new("TextLabel", eggFrame)
-    title.Size = UDim2.new(1, -10, 0, 25)
-    title.Position = UDim2.new(0, 5, 0, y)
-    title.BackgroundTransparency = 1
-    title.Text = egg
-    title.Font = Enum.Font.GothamBold
-    title.TextColor3 = Color3.fromRGB(0, 200, 255)
-    title.TextSize = 18
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    y += 28
+  local eggGui=Instance.new("ScreenGui",PlayerGui)
+  eggGui.Name="EggInfoUI";eggGui.Enabled=false
 
-    for _, pet in ipairs(pets) do
-      local label = Instance.new("TextLabel", eggFrame)
-      label.Size = UDim2.new(1, -20, 0, 20)
-      label.Position = UDim2.new(0, 10, 0, y)
-      label.BackgroundTransparency = 1
-      label.Text = "• " .. pet.name .. " – " .. pet.chance .. "%"
-      label.Font = Enum.Font.Gotham
-      label.TextColor3 = Color3.new(1, 1, 1)
-      label.TextSize = 14
-      label.TextXAlignment = Enum.TextXAlignment.Left
-      y += 22
+  local eggFr=Instance.new("Frame",eggGui)
+  eggFr.Size=UDim2.new(0,260,0,320);eggFr.Position=UDim2.new(0.5,-130,0.4,-160)
+  eggFr.BackgroundColor3=Color3.fromRGB(35,35,45);eggFr.Active=true;eggFr.Draggable=true
+
+  local sc=Instance.new("ScrollingFrame",eggFr)
+  sc.Size=UDim2.new(1,-10,1,-10);sc.Position=UDim2.new(0,5,0,5)
+  sc.CanvasSize=UDim2.new(0,0,1,0);sc.ScrollBarThickness=6
+
+  local yy=0
+  for egg,pets in pairs(eggToPets) do
+    local t=Instance.new("TextLabel",sc)
+    t.Size=UDim2.new(1,0,0,25);t.Position=UDim2.new(0,0,0,yy)
+    t.BackgroundTransparency=1;t.Text=egg
+    t.Font=Enum.Font.GothamBold;t.TextColor3=Color3.fromRGB(0,200,255);t.TextSize=16
+    yy+=25
+    for _,p in ipairs(pets) do
+      local tt2=Instance.new("TextLabel",sc)
+      tt2.Size=UDim2.new(1,-10,0,20);tt2.Position=UDim2.new(0,5,0,yy)
+      tt2.BackgroundTransparency=1;tt2.Text="• "..p.name.." – "..p.chance.."%"
+      tt2.Font=Enum.Font.Gotham;tt2.TextColor3=Color3.new(1,1,1);tt2.TextSize=14
+      yy+=20
     end
-    y += 8
+    yy+=10
   end
+  sc.CanvasSize=UDim2.new(0,0,0,yy)
 
-  predictBtn.MouseButton1Click:Connect(function()
-    predictBtn.Text = "Please wait..."
-    randomizeEggs()
-    wait(2)
-    predictBtn.Text = "Predict Pets"
+  pb1.MouseButton1Click:Connect(function()
+    pb1.Text="Please wait...";randomizeEggs();wait(1.5);pb1.Text="Predict Pets"
   end)
 
-  infoBtn.MouseButton1Click:Connect(function()
-    eggGui.Enabled = not eggGui.Enabled
+  ib.MouseButton1Click:Connect(function()
+    eggGui.Enabled=not eggGui.Enabled
+  end)
+
+  mb.MouseButton1Click:Connect(function()
+    fr.Visible=false
+  end)
+
+  xb.MouseButton1Click:Connect(function()
+    gui:Destroy();eggGui:Destroy();clearESP()
   end)
 end)
