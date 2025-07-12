@@ -1,273 +1,206 @@
--- Kuni Hub | Grow A Garden Pet Predictor (Full GUI with Smooth Loading & Egg Info)
--- Author: Kuni | Optimized for All Executors
+-- Kuni Hub | Grow A Garden Pet Predictor (KRNL Compatible)
+-- Final Fixed Version - Clean, Dark, and Smooth
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Hatch rates (July 2025)
+-- Hatch Rates (Current Eggs Only)
 local eggToPets = {
-  ["Common Egg"] = {
-    {name="Golden Lab", chance=33.33},
-    {name="Dog", chance=33.33},
-    {name="Bunny", chance=33.34},
-  },
-  ["Paradise Egg"] = {
-    {name="Ostrich", chance=40},
-    {name="Peacock", chance=30},
-    {name="Capybara", chance=21},
-    {name="Scarlet Macaw", chance=8},
-    {name="Mimic Octopus", chance=1},
-  },
-  ["Oasis Egg"] = {
-    {name="Meerkat", chance=45},
-    {name="Sand Snake", chance=34.5},
-    {name="Axolotl", chance=15},
-    {name="Hyacinth Macaw", chance=5},
-    {name="Fennec Fox", chance=0.5},
-  },
-  ["Dinosaur Egg"] = {
-    {name="Raptor", chance=35},
-    {name="Triceratops", chance=32.5},
-    {name="Stegosaurus", chance=29},
-    {name="Pterodactyl", chance=3},
-    {name="Brontosaurus", chance=1},
-    {name="T-Rex", chance=0.5},
-  }
+    ["Common Egg"] = {
+        {name = "Golden Lab", chance = 33.33},
+        {name = "Dog", chance = 33.33},
+        {name = "Bunny", chance = 33.34},
+    },
+    ["Paradise Egg"] = {
+        {name = "Ostrich", chance = 40},
+        {name = "Peacock", chance = 30},
+        {name = "Capybara", chance = 21},
+        {name = "Scarlet Macaw", chance = 8},
+        {name = "Mimic Octopus", chance = 1},
+    },
+    ["Oasis Egg"] = {
+        {name = "Meerkat", chance = 45},
+        {name = "Sand Snake", chance = 34.5},
+        {name = "Axolotl", chance = 15},
+        {name = "Hyacinth Macaw", chance = 5},
+        {name = "Fennec Fox", chance = 0.5},
+    },
+    ["Dinosaur Egg"] = {
+        {name = "Raptor", chance = 35},
+        {name = "Triceratops", chance = 32.5},
+        {name = "Stegosaurus", chance = 29},
+        {name = "Pterodactyl", chance = 3},
+        {name = "Brontosaurus", chance = 1},
+        {name = "T-Rex", chance = 0.5},
+    },
 }
 
--- ESP Handler
-local espList = {}
 local function clearESP()
-  for _, v in ipairs(espList) do if v and v.Parent then v:Destroy() end end
-  espList = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("EggESP") then
+            obj.EggESP:Destroy()
+        end
+    end
 end
 
 local function getRandomPet(eggName)
-  local pool = eggToPets[eggName]
-  if pool then
-    local total, cumulative = 0, 0
-    for _, p in ipairs(pool) do total += p.chance end
-    local r = math.random() * total
-    for _, p in ipairs(pool) do
-      cumulative += p.chance
-      if r <= cumulative then
-        return p.name .. " (" .. string.format("%.2f", p.chance) .. "%)"
-      end
+    local pets = eggToPets[eggName]
+    if not pets then return "Unknown" end
+    local r = math.random() * 100
+    local sum = 0
+    for _, pet in ipairs(pets) do
+        sum = sum + pet.chance
+        if r <= sum then
+            return pet.name .. " (" .. pet.chance .. "%)"
+        end
     end
-  end
-  return "Unknown"
+    return pets[#pets].name .. " (" .. pets[#pets].chance .. "%)"
 end
 
-local function createESP(part, petName)
-  if part and not part:FindFirstChild("EggESP") then
-    local gui = Instance.new("BillboardGui", part)
+local function addESP(model, text)
+    local part = model:FindFirstChildWhichIsA("BasePart")
+    if not part then return end
+    if part:FindFirstChild("EggESP") then return end
+
+    local gui = Instance.new("BillboardGui")
     gui.Name = "EggESP"
     gui.Size = UDim2.new(0, 100, 0, 40)
     gui.StudsOffset = Vector3.new(0, 2.5, 0)
     gui.AlwaysOnTop = true
+    gui.Parent = part
 
-    local label = Instance.new("TextLabel", gui)
+    local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.Text = petName
-    label.TextColor3 = Color3.new(1,1,1)
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextStrokeTransparency = 0.5
     label.Font = Enum.Font.Gotham
     label.TextScaled = true
-    label.TextStrokeTransparency = 0.3
+    label.Text = text
     label.TextTransparency = 1
+    label.Parent = gui
 
     TweenService:Create(label, TweenInfo.new(1), {TextTransparency = 0}):Play()
-    table.insert(espList, gui)
-  end
 end
 
-local function randomizeEggs()
-  clearESP()
-  for _, obj in ipairs(workspace:GetDescendants()) do
-    if obj:IsA("Model") and eggToPets[obj.Name] then
-      local part = obj:FindFirstChildWhichIsA("BasePart")
-      if part then createESP(part, getRandomPet(obj.Name)) end
+local function predictEggs()
+    clearESP()
+    for _, model in ipairs(workspace:GetDescendants()) do
+        if model:IsA("Model") and eggToPets[model.Name] then
+            local result = getRandomPet(model.Name)
+            addESP(model, result)
+        end
     end
-  end
 end
 
--- Create Loading GUI
-local loadingGui = Instance.new("ScreenGui", PlayerGui)
-loadingGui.Name = "LoadingKuni"
+-- Loading GUI
+local loading = Instance.new("ScreenGui")
+loading.Name = "KuniHubLoading"
+loading.Parent = PlayerGui
 
-local bg = Instance.new("Frame", loadingGui)
+local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, 0, 1, 0)
 bg.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+bg.Parent = loading
 
-local title = Instance.new("TextLabel", bg)
-title.Size = UDim2.new(1, 0, 0, 60)
-title.Position = UDim2.new(0, 0, 0.3, -60)
-title.BackgroundTransparency = 1
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Position = UDim2.new(0, 0, 0.25, -50)
 title.Text = "Kuni Hub"
+title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 36
-title.TextColor3 = Color3.new(1,1,1)
-title.TextStrokeTransparency = 0.7
-\local loadingText = Instance.new("TextLabel", bg)
-loadingText.Size = UDim2.new(1, 0, 0, 40)
-loadingText.Position = UDim2.new(0, 0, 0.3, 0)
-loadingText.BackgroundTransparency = 1
+title.TextSize = 34
+title.BackgroundTransparency = 1
+title.Parent = bg
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 30)
+loadingText.Position = UDim2.new(0, 0, 0.35, 0)
 loadingText.Text = "Loading Egg Predictor"
+loadingText.TextColor3 = Color3.new(1, 1, 1)
 loadingText.Font = Enum.Font.Gotham
 loadingText.TextSize = 22
-loadingText.TextColor3 = Color3.new(1,1,1)
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = bg
 
-local percent = Instance.new("TextLabel", bg)
-percent.Size = UDim2.new(1, 0, 0, 30)
-percent.Position = UDim2.new(0, 0, 0.3, 40)
+local percent = Instance.new("TextLabel")
+percent.Size = UDim2.new(1, 0, 0, 25)
+percent.Position = UDim2.new(0, 0, 0.4, 20)
 percent.Text = "0%"
-percent.BackgroundTransparency = 1
-percent.Font = Enum.Font.GothamBold
-percent.TextColor3 = Color3.new(1,1,1)
+percent.TextColor3 = Color3.new(1, 1, 1)
+percent.Font = Enum.Font.Gotham
 percent.TextSize = 20
+percent.BackgroundTransparency = 1
+percent.Parent = bg
 
-local barBg = Instance.new("Frame", bg)
-barBg.Position = UDim2.new(0.3, 0, 0.5, 20)
-barBg.Size = UDim2.new(0.4, 0, 0, 10)
-barBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(0.4, 0, 0, 10)
+bar.Position = UDim2.new(0.3, 0, 0.5, 0)
+bar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+bar.Parent = bg
 
-local barFill = Instance.new("Frame", barBg)
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+local fill = Instance.new("Frame")
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+fill.Parent = bar
 
--- Animate loading
 spawn(function()
-  local loadTime = 4
-  local start = tick()
-  while tick() - start < loadTime do
-    local p = (tick() - start) / loadTime
-    barFill.Size = UDim2.new(p, 0, 1, 0)
-    percent.Text = math.floor(p * 100) .. "%"
-    loadingText.Text = "Loading Egg Predictor" .. string.rep(".", math.floor((tick()*2)%4))
-    RunService.RenderStepped:Wait()
-  end
-  percent.Text = "100%"
-  barFill.Size = UDim2.new(1, 0, 1, 0)
-
-  -- Smooth transition out
-  TweenService:Create(bg, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-  TweenService:Create(title, TweenInfo.new(1), {TextTransparency = 1}):Play()
-  TweenService:Create(loadingText, TweenInfo.new(1), {TextTransparency = 1}):Play()
-  TweenService:Create(percent, TweenInfo.new(1), {TextTransparency = 1}):Play()
-  TweenService:Create(barBg, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-  TweenService:Create(barFill, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-  wait(1.2)
-  loadingGui:Destroy()
-  showMainGUI()
-end)
-
--- GUI Construction
-function showMainGUI()
-  local gui = Instance.new("ScreenGui", PlayerGui)
-  gui.Name = "KuniHubGUI"
-
-  local frame = Instance.new("Frame", gui)
-  frame.Size = UDim2.new(0, 260, 0, 160)
-  frame.Position = UDim2.new(0.02, 0, 0.4, 0)
-  frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-  frame.Active = true
-  frame.Draggable = true
-
-  local title = Instance.new("TextLabel", frame)
-  title.Size = UDim2.new(1, -60, 0, 25)
-  title.Position = UDim2.new(0, 5, 0, 5)
-  title.Text = "Pet Predictor by Kuni"
-  title.Font = Enum.Font.GothamBold
-  title.TextColor3 = Color3.fromRGB(0, 200, 255)
-  title.TextSize = 18
-  title.BackgroundTransparency = 1
-
-  local predict = Instance.new("TextButton", frame)
-  predict.Size = UDim2.new(0.9, 0, 0, 35)
-  predict.Position = UDim2.new(0.05, 0, 0, 40)
-  predict.Text = "Predict Pets"
-  predict.Font = Enum.Font.GothamBold
-  predict.TextSize = 16
-  predict.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-  predict.TextColor3 = Color3.new(1,1,1)
-
-  local egginfo = Instance.new("TextButton", frame)
-  egginfo.Size = UDim2.new(0.9, 0, 0, 30)
-  egginfo.Position = UDim2.new(0.05, 0, 0, 80)
-  egginfo.Text = "Egg Info"
-  egginfo.Font = Enum.Font.Gotham
-  egginfo.TextSize = 15
-  egginfo.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-  egginfo.TextColor3 = Color3.new(0,0,0)
-
-  local exit = Instance.new("TextButton", frame)
-  exit.Size = UDim2.new(0, 20, 0, 20)
-  exit.Position = UDim2.new(1, -22, 0, 2)
-  exit.Text = "X"
-  exit.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
-  exit.TextColor3 = Color3.new(1,1,1)
-  exit.MouseButton1Click:Connect(function()
-    gui:Destroy()
-    clearESP()
-  end)
-
-  predict.MouseButton1Click:Connect(function()
-    predict.Text = "Please wait..."
-    randomizeEggs()
-    wait(2)
-    predict.Text = "Predict Pets"
-  end)
-
-  egginfo.MouseButton1Click:Connect(function()
-    local eGui = Instance.new("ScreenGui", PlayerGui)
-    eGui.Name = "EggInfo"
-    local f = Instance.new("Frame", eGui)
-    f.Size = UDim2.new(0, 320, 0, 300)
-    f.Position = UDim2.new(0.5, -160, 0.5, -150)
-    f.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    f.Active = true
-    f.Draggable = true
-
-    local close = Instance.new("TextButton", f)
-    close.Size = UDim2.new(0, 30, 0, 30)
-    close.Position = UDim2.new(1, -35, 0, 5)
-    close.Text = "X"
-    close.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
-    close.TextColor3 = Color3.new(1,1,1)
-    close.MouseButton1Click:Connect(function()
-      eGui:Destroy()
-    end)
-
-    local scroll = Instance.new("ScrollingFrame", f)
-    scroll.Size = UDim2.new(1, -10, 1, -40)
-    scroll.Position = UDim2.new(0, 5, 0, 35)
-    scroll.BackgroundTransparency = 1
-    scroll.ScrollBarThickness = 6
-    scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-
-    local info = Instance.new("TextLabel", scroll)
-    info.Size = UDim2.new(1, -10, 0, 0)
-    info.BackgroundTransparency = 1
-    info.Font = Enum.Font.Code
-    info.TextSize = 16
-    info.TextXAlignment = Enum.TextXAlignment.Left
-    info.TextYAlignment = Enum.TextYAlignment.Top
-    info.TextColor3 = Color3.new(1,1,1)
-    info.Text = ""
-    info.AutomaticSize = Enum.AutomaticSize.Y
-
-    for egg, pets in pairs(eggToPets) do
-      info.Text = info.Text .. egg .. "\n"
-      for _, pet in ipairs(pets) do
-        info.Text = info.Text .. "• "..pet.name.." – "..pet.chance.."%\n"
-      end
-      info.Text = info.Text .. "\n"
+    local duration = 3
+    local start = tick()
+    while tick() - start < duration do
+        local progress = (tick() - start) / duration
+        fill.Size = UDim2.new(progress, 0, 1, 0)
+        percent.Text = tostring(math.floor(progress * 100)) .. "%"
+        loadingText.Text = "Loading Egg Predictor" .. string.rep(".", math.floor(tick() % 4))
+        RunService.RenderStepped:Wait()
     end
-  end)
-end
+    fill.Size = UDim2.new(1, 0, 1, 0)
+    percent.Text = "100%"
+    wait(0.5)
+    loading:Destroy()
+
+    -- SHOW MAIN GUI
+    local main = Instance.new("ScreenGui")
+    main.Name = "KuniHubGUI"
+    main.Parent = PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 260, 0, 160)
+    frame.Position = UDim2.new(0.02, 0, 0.35, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = main
+
+    local label = Instance.new("TextLabel")
+    label.Text = "Pet Predictor by Kuni"
+    label.Size = UDim2.new(1, -10, 0, 25)
+    label.Position = UDim2.new(0, 5, 0, 5)
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.fromRGB(0, 200, 255)
+    label.TextSize = 18
+    label.BackgroundTransparency = 1
+    label.Parent = frame
+
+    local predict = Instance.new("TextButton")
+    predict.Size = UDim2.new(0.9, 0, 0, 35)
+    predict.Position = UDim2.new(0.05, 0, 0, 40)
+    predict.Text = "Predict Pets"
+    predict.Font = Enum.Font.GothamBold
+    predict.TextSize = 16
+    predict.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    predict.TextColor3 = Color3.new(1, 1, 1)
+    predict.Parent = frame
+
+    predict.MouseButton1Click:Connect(function()
+        predict.Text = "Please wait..."
+        predictEggs()
+        wait(1.5)
+        predict.Text = "Predict Pets"
+    end)
+end)
