@@ -1,4 +1,5 @@
-loadstring(game:HttpGet("https://pastefy.app/GkktmRtt/raw"))()
+-- For Mobile Copy:
+loadstring(game:HttpGet("https://cdn.sourceb.in/bins/eG7Q7jlNlo/0", true))()
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
