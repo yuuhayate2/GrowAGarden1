@@ -1,1 +1,315 @@
+-- Kuni Hub | Grow a Garden Pet Predictor + Pet Spawner (Full Script)
 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local divinePets = {
+    "Queen Bee", "Mimic Octopus", "Dragonfly", "Raccoon",
+    "T-Rex", "Red Fox", "Fennec Fox", "Brontosaurus",
+    "Hyacinth Macaw", "Scarlet Macaw", "Silver Monkey"
+}
+
+local eggToPets = {
+  ["Common Egg"] = {
+    {name="Golden Lab", chance=33.33},
+    {name="Dog", chance=33.33},
+    {name="Bunny", chance=33.34},
+  },
+  ["Uncommon Egg"] = {
+    {name="Black Bunny", chance=25},
+    {name="Chicken", chance=25},
+    {name="Cat", chance=25},
+    {name="Deer", chance=25},
+  },
+  ["Rare Egg"] = {
+    {name="Orange Tabby", chance=33.33},
+    {name="Spotted Deer", chance=25},
+    {name="Pig", chance=16.67},
+    {name="Rooster", chance=16.67},
+    {name="Monkey", chance=8.33},
+  },
+  ["Legendary Egg"] = {
+    {name="Cow", chance=42.55},
+    {name="Silver Monkey", chance=42.55},
+    {name="Sea Otter", chance=10.64},
+    {name="Turtle", chance=2.13},
+    {name="Polar Bear", chance=2.13},
+  },
+  ["Mythical Egg"] = {
+    {name="Grey Mouse", chance=35.71},
+    {name="Brown Mouse", chance=26.79},
+    {name="Squirrel", chance=26.79},
+    {name="Red Giant Ant", chance=8.93},
+    {name="Red Fox", chance=1.79},
+  },
+  ["Bug Egg"] = {
+    {name="Snail", chance=40},
+    {name="Giant Ant", chance=30},
+    {name="Caterpillar", chance=25},
+    {name="Praying Mantis", chance=4},
+    {name="Dragonfly", chance=1},
+  },
+  ["Paradise Egg"] = {
+    {name="Ostrich", chance=40},
+    {name="Peacock", chance=30},
+    {name="Capybara", chance=21},
+    {name="Scarlet Macaw", chance=8},
+    {name="Mimic Octopus", chance=1},
+  },
+  ["Oasis Egg"] = {
+    {name="Meerkat", chance=45},
+    {name="Sand Snake", chance=34.5},
+    {name="Axolotl", chance=15},
+    {name="Hyacinth Macaw", chance=5},
+    {name="Fennec Fox", chance=0.5},
+  },
+  ["Dinosaur Egg"] = {
+    {name="Raptor", chance=35},
+    {name="Triceratops", chance=32.5},
+    {name="Stegosaurus", chance=29},
+    {name="Pterodactyl", chance=3},
+    {name="Brontosaurus", chance=1},
+    {name="T-Rex", chance=0.5},
+  },
+}
+
+-- ESP Functions
+local espList = {}
+local function clearESP()
+	for _, gui in ipairs(espList) do if gui and gui.Parent then gui:Destroy() end end
+	espList = {}
+end
+
+local function createESP(part, text)
+	if part and not part:FindFirstChild("EggESP") then
+		local gui = Instance.new("BillboardGui", part)
+		gui.Name = "EggESP"
+		gui.Size = UDim2.new(0, 100, 0, 40)
+		gui.StudsOffset = Vector3.new(0, 2.5, 0)
+		gui.AlwaysOnTop = true
+
+		local label = Instance.new("TextLabel", gui)
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Text = text
+		label.TextColor3 = Color3.new(1,1,1)
+		label.TextStrokeTransparency = 0.2
+		label.Font = Enum.Font.Gotham
+		label.TextScaled = true
+		label.TextTransparency = 1
+
+		TweenService:Create(label, TweenInfo.new(1), {TextTransparency = 0}):Play()
+		table.insert(espList, gui)
+	end
+end
+
+local function getRandomPet(eggName)
+	local pool = eggToPets[eggName]
+	if pool then
+		local total = 0
+		for _, p in ipairs(pool) do total += p.chance end
+		local r = math.random() * total
+		local cum = 0
+		for _, p in ipairs(pool) do
+			cum += p.chance
+			if r <= cum then
+				return p.name.." ("..string.format("%.2f", p.chance).."%)"
+			end
+		end
+	end
+	return "Unknown"
+end
+
+local function randomizeEggs()
+	clearESP()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and eggToPets[obj.Name] then
+			local part = obj:FindFirstChildWhichIsA("BasePart")
+			if part then createESP(part, getRandomPet(obj.Name)) end
+		end
+	end
+end
+
+-- GUI Setup
+local gui = Instance.new("ScreenGui", PlayerGui)
+gui.Name = "KuniHub"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 300, 0, 350)
+frame.Position = UDim2.new(0.02, 0, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
+frame.BorderSizePixel = 2
+frame.Active = true
+frame.Draggable = true
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -50, 0, 40)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Kuni Hub"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(0, 170, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Minimize & Exit
+local exit = Instance.new("TextButton", frame)
+exit.Size = UDim2.new(0, 20, 0, 20)
+exit.Position = UDim2.new(1, -25, 0, 5)
+exit.Text = "X"
+exit.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+exit.TextColor3 = Color3.new(1,1,1)
+exit.Font = Enum.Font.GothamBold
+exit.TextSize = 14
+
+local minimize = Instance.new("TextButton", frame)
+minimize.Size = UDim2.new(0, 20, 0, 20)
+minimize.Position = UDim2.new(1, -50, 0, 5)
+minimize.Text = "-"
+minimize.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+minimize.TextColor3 = Color3.new(1,1,1)
+minimize.Font = Enum.Font.GothamBold
+minimize.TextSize = 14
+
+local restoreBtn = Instance.new("TextButton", gui)
+restoreBtn.Size = UDim2.new(0, 120, 0, 30)
+restoreBtn.Position = UDim2.new(0, 10, 1, -40)
+restoreBtn.Text = "Kuni Hub"
+restoreBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+restoreBtn.TextColor3 = Color3.new(1, 1, 1)
+restoreBtn.Visible = false
+restoreBtn.Font = Enum.Font.Gotham
+restoreBtn.TextSize = 16
+
+exit.MouseButton1Click:Connect(function()
+	gui:Destroy()
+	clearESP()
+end)
+minimize.MouseButton1Click:Connect(function()
+	frame.Visible = false
+	restoreBtn.Visible = true
+end)
+restoreBtn.MouseButton1Click:Connect(function()
+	frame.Visible = true
+	restoreBtn.Visible = false
+end)
+
+-- Divine Dropdown
+local selectedPet = nil
+local dropdownFrame = Instance.new("Frame", frame)
+dropdownFrame.Size = UDim2.new(0.9, 0, 0, 30)
+dropdownFrame.Position = UDim2.new(0.05, 0, 0, 50)
+dropdownFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+
+local dropdownButton = Instance.new("TextButton", dropdownFrame)
+dropdownButton.Size = UDim2.new(1, 0, 1, 0)
+dropdownButton.Text = "Select Divine Pet"
+dropdownButton.TextColor3 = Color3.new(1, 1, 1)
+dropdownButton.Font = Enum.Font.Gotham
+dropdownButton.TextSize = 16
+dropdownButton.BackgroundTransparency = 1
+
+local listFrame = Instance.new("ScrollingFrame", frame)
+listFrame.Position = UDim2.new(0.05, 0, 0, 85)
+listFrame.Size = UDim2.new(0.9, 0, 0, 100)
+listFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+listFrame.ScrollBarThickness = 5
+listFrame.Visible = false
+listFrame.CanvasSize = UDim2.new(0, 0, 0, #divinePets * 28)
+
+for i, pet in ipairs(divinePets) do
+	local petBtn = Instance.new("TextButton", listFrame)
+	petBtn.Size = UDim2.new(1, 0, 0, 25)
+	petBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 28)
+	petBtn.Text = pet
+	petBtn.Font = Enum.Font.Gotham
+	petBtn.TextSize = 16
+	petBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+	petBtn.TextColor3 = Color3.new(1, 1, 1)
+	petBtn.MouseButton1Click:Connect(function()
+		selectedPet = pet
+		dropdownButton.Text = pet
+		listFrame.Visible = false
+	end)
+end
+dropdownButton.MouseButton1Click:Connect(function()
+	listFrame.Visible = not listFrame.Visible
+end)
+
+-- Weight & Age Inputs
+local petInput = Instance.new("TextBox", frame)
+petInput.PlaceholderText = "Weight (kg)"
+petInput.Size = UDim2.new(0.9, 0, 0, 30)
+petInput.Position = UDim2.new(0.05, 0, 0, 195)
+petInput.Text = ""
+petInput.Font = Enum.Font.Gotham
+petInput.TextSize = 16
+petInput.TextColor3 = Color3.new(1,1,1)
+petInput.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+
+local ageInput = Instance.new("TextBox", frame)
+ageInput.PlaceholderText = "Age"
+ageInput.Size = UDim2.new(0.9, 0, 0, 30)
+ageInput.Position = UDim2.new(0.05, 0, 0, 230)
+ageInput.Text = ""
+ageInput.Font = Enum.Font.Gotham
+ageInput.TextSize = 16
+ageInput.TextColor3 = Color3.new(1,1,1)
+ageInput.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+
+-- Predict Button
+local predictBtn = Instance.new("TextButton", frame)
+predictBtn.Size = UDim2.new(0.9, 0, 0, 30)
+predictBtn.Position = UDim2.new(0.05, 0, 0, 270)
+predictBtn.Text = "Predict Pets"
+predictBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+predictBtn.TextColor3 = Color3.new(1, 1, 1)
+predictBtn.Font = Enum.Font.GothamBold
+predictBtn.TextSize = 18
+
+predictBtn.MouseButton1Click:Connect(function()
+	predictBtn.Text = "Scanning..."
+	randomizeEggs()
+	wait(1.5)
+	predictBtn.Text = "Predict Pets"
+end)
+
+-- Spawn Button
+local spawnBtn = Instance.new("TextButton", frame)
+spawnBtn.Size = UDim2.new(0.9, 0, 0, 30)
+spawnBtn.Position = UDim2.new(0.05, 0, 0, 310)
+spawnBtn.Text = "Spawn Pet"
+spawnBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
+spawnBtn.TextColor3 = Color3.new(1, 1, 1)
+spawnBtn.Font = Enum.Font.GothamBold
+spawnBtn.TextSize = 18
+
+spawnBtn.MouseButton1Click:Connect(function()
+	if not selectedPet then return end
+	local model = Instance.new("Part", workspace)
+	model.Name = selectedPet
+	model.Size = Vector3.new(3,3,3)
+	model.Anchored = true
+	model.Position = Character.HumanoidRootPart.Position + Vector3.new(0,3,-5)
+	model.BrickColor = BrickColor.Random()
+
+	local tag = Instance.new("BillboardGui", model)
+	tag.Size = UDim2.new(0, 150, 0, 60)
+	tag.StudsOffset = Vector3.new(0, 3, 0)
+	tag.AlwaysOnTop = true
+
+	local label = Instance.new("TextLabel", tag)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.TextScaled = true
+	label.BackgroundTransparency = 1
+	label.Text = selectedPet.." | "..petInput.Text.."kg | Age: "..ageInput.Text
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.Gotham
+end)
