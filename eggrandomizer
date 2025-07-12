@@ -1,4 +1,4 @@
--- Pet Predictor by Kuni with Loading Screen
+
 
 local Players = game:GetService("Players")
 local CollectionService = game:GetService("CollectionService")
